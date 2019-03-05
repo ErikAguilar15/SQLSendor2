@@ -225,6 +225,8 @@ bool GroupBy::GetNext(Record& _record){
 	Schema sum = _schemaOut;
 	sum.Project(attsToKeep1);
 
+	int phase = 0;
+
 	if (phase == 0)
 	{
 		while (producer->GetNext(_record))
