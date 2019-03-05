@@ -321,7 +321,6 @@ DuplicateRemoval::DuplicateRemoval(Schema& _schema, RelationalOp* _producer) {
 
 	schema = _schema;
 	producer = _producer;
-	map <string, double> set;
 
 }
 
@@ -408,9 +407,7 @@ GroupBy::GroupBy(Schema& _schemaIn, Schema& _schemaOut, OrderMaker& _groupingAtt
 		groupingAtts = _groupingAtts;
 		compute = _compute;
 		producer = _producer;
-		int phase = 0;
-		map <string, double> set;
-		map <string, Record> recMap;
+		phase = 0;
 
 }
 
