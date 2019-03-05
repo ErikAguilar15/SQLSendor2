@@ -104,6 +104,10 @@ Join::~Join() {
 
 }
 
+virtual bool GetNext(Record& _record) {
+
+}
+
 ostream& Join::print(ostream& _os) {
 	return _os << "JOIN";
 }
@@ -116,6 +120,23 @@ DuplicateRemoval::DuplicateRemoval(Schema& _schema, RelationalOp* _producer) {
 
 DuplicateRemoval::~DuplicateRemoval() {
 
+}
+
+virtual bool GetNext(Record& _record) {
+
+	while(1){
+		if(! producer->GetNext(_record)){
+			return false;
+		}
+		stringstream ss;
+		_record.print(ss, _schema);
+		auto iterator = set.find(ss.str());
+
+		if(iterator == set.end()){
+			set[ss.str()] = _record;
+			return true;
+		}
+	}
 }
 
 ostream& DuplicateRemoval::print(ostream& _os) {
@@ -133,6 +154,36 @@ Sum::Sum(Schema& _schemaIn, Schema& _schemaOut, Function& _compute,
 
 Sum::~Sum() {
 
+}
+
+virtual bool GetNext(Record& _record) {
+	double doubleSum = 0;
+	int intSum = 0;
+
+	while(producer->GetNext(_record)){
+		int intResult = 0;
+		double doubleResult = 0;
+		Type t = compute.Apply(_record, intResult, doubleResult);
+		if(t == Integer){
+			intSum += intResult;
+		}
+		if(t == Float){
+			doubleSum += doubleResult;
+		}
+	}
+
+	double val = doubleSum + (double)intSum;
+	char *recSpace = new char[PAGE_SIZE];
+	int currentPosInRec = sizeof (int) * (2);
+	((int *) recSpace)[1] = currentPosInRec;
+  	*((double *) &(recSpace[currentPosInRec])) = val;
+  	currentPosInRec += sizeof (double);
+	((int *) recSpace)[0] = currentPosInRec;
+        Record sumRec;
+        sumRec.CopyBits(recSpace, currentPosInRec);
+        delete [] recSpace;
+				_record = sumRec;
+	return true;
 }
 
 ostream& Sum::print(ostream& _os) {
