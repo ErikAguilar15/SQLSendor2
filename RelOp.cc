@@ -205,6 +205,8 @@ GroupBy::GroupBy(Schema& _schemaIn, Schema& _schemaOut, OrderMaker& _groupingAtt
 		groupingAtts = _groupingAtts;
 		compute = _compute;
 		producer = _producer;
+		int phase = 0;
+
 
 }
 
@@ -224,8 +226,6 @@ bool GroupBy::GetNext(Record& _record){
 	attsToKeep1.push_back(0);
 	Schema sum = _schemaOut;
 	sum.Project(attsToKeep1);
-
-	int phase = 0;
 
 	if (phase == 0)
 	{
