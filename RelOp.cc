@@ -78,7 +78,7 @@ bool Project::GetNext(Record& _record) {
 
 	if (producer->GetNext(_record))
 	{
-		_record.Project(keepMe, numAttsOutput, numAttsInput);		
+		_record.Project(keepMe, numAttsOutput, numAttsInput);
 		return true;
 	}
 	return false;
@@ -92,7 +92,12 @@ ostream& Project::print(ostream& _os) {
 
 Join::Join(Schema& _schemaLeft, Schema& _schemaRight, Schema& _schemaOut,
 	CNF& _predicate, RelationalOp* _left, RelationalOp* _right) {
-
+		schemaLeft = _schemaLeft;
+		schemaRight = _schemaRight;
+		schemaOut = _schemaOut;
+		predicate = _predicate;
+		left = _left;
+		right = _right;
 }
 
 Join::~Join() {
@@ -105,7 +110,8 @@ ostream& Join::print(ostream& _os) {
 
 
 DuplicateRemoval::DuplicateRemoval(Schema& _schema, RelationalOp* _producer) {
-
+	schema = _schema;
+	producer = _producer;
 }
 
 DuplicateRemoval::~DuplicateRemoval() {
@@ -119,7 +125,10 @@ ostream& DuplicateRemoval::print(ostream& _os) {
 
 Sum::Sum(Schema& _schemaIn, Schema& _schemaOut, Function& _compute,
 	RelationalOp* _producer) {
-
+		schemaIn = _schemaIn;
+		schemaOut = _schemaOut;
+		compute = _compute;
+		producer = _producer;
 }
 
 Sum::~Sum() {
@@ -133,7 +142,11 @@ ostream& Sum::print(ostream& _os) {
 
 GroupBy::GroupBy(Schema& _schemaIn, Schema& _schemaOut, OrderMaker& _groupingAtts,
 	Function& _compute,	RelationalOp* _producer) {
-
+		schemaIn = _schemaIn;
+		schemaOut = _schemaOut;
+		groupingAtts = _groupingAtts;
+		compute = _compute;
+		producer = _producer;
 }
 
 GroupBy::~GroupBy() {
@@ -146,7 +159,10 @@ ostream& GroupBy::print(ostream& _os) {
 
 
 WriteOut::WriteOut(Schema& _schema, string& _outFile, RelationalOp* _producer) {
-
+	schema = _schema;
+	outFile = _outFile;
+	producer = _producer;
+	schema = _schema;
 }
 
 WriteOut::~WriteOut() {
