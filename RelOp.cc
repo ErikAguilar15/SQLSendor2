@@ -279,7 +279,6 @@ bool GroupBy::GetNext(Record& _record){
 		return true;
 	}
 }
-}
 
 ostream& GroupBy::print(ostream& _os) {
 	return _os << "GROUP BY";
