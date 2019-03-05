@@ -100,6 +100,107 @@ Join::Join(Schema& _schemaLeft, Schema& _schemaRight, Schema& _schemaOut,
 		left = _left;
 		right = _right;
 
+		int cntLeft = 0;
+		int cntRight = 0;
+		int vecInd = 0;
+		Record lastrec;
+		Record record;
+
+		vector<int> watt1, watt2;
+		map <string, vector <Record> > List;
+
+		vector<Attribute> attsLeft = _schemaLeft.GetAtts();
+		vector<Attribute> attsRight = _schemaRight.GetAtts();
+		for (auto a:attsLeft) {
+			if (_schemaLeft.GetDistincts(a.name) > countL)	countL = _schemaLeft.GetDistincts(a.name);
+		}
+		for (auto a:attsRight) {
+			if (_schemaRight.GetDistincts(a.name) > countR)	countR = _schemaRight.GetDistincts(a.name);
+		}
+
+		if (predicate.andList[predicate.numAnds - 1].operand == Left) {
+			for (int i = 0; i < predicate.numAnds; i++) {
+				watt1.push_back(predicate.andList[i].whichAtt1);
+				watt2.push_back(predicate.andList[i].whichAtt2);
+			}
+		}
+		else {
+			for (int i = 0; i < predicate.numAnds; i++) {
+				watt1.push_back(predicate.andList[i].whichAtt2);
+				watt2.push_back(predicate.andList[i].whichAtt1);
+			}
+		}
+
+		if (cntLeft > cntRight) {
+			while (1) {
+				if (right -> GetNext(record)){
+					Record copy = record;
+					int* attsToKeep = &watt2[0];
+					int numAttsToKeep = predicate.numAnds;
+					int numAttsNow = schemaRight.GetNumAtts();
+					copy.Project (attsToKeep, numAttsToKeep, numAttsNow);
+					Schema sCopy = schemaRight;
+					sCopy.Project(watt2);
+					vector <Attribute> attsToErase = sCopy.GetAtts();
+
+					stringstream s;
+					copy.print(s, sCopy);
+					string sc = "", ss = s.str();
+
+					for (int i = 0; i < attsToErase.size(); i++)
+					{
+						string insideLoop = attsToErase[i].name;
+						ss.erase (ss.find(insideLoop), insideLoop.size()+2);
+						sc+= ss;
+					}
+
+					auto it = List.find(s.str());
+					if(it != List.end())	List[sc].push_back(record);
+					else
+					{
+						vector <Record> v;
+						v.push_back(record);
+						List.insert (make_pair(sc, v));
+					}
+
+				}
+				else break;
+			}
+		}
+		else {
+			while (1) {
+				if (left -> GetNext(record)){
+				Record copy = record;
+				int* attsToKeep = &watt1[0];
+				int numAttsToKeep = predicate.numAnds;
+				int numAttsNow = schemaLeft.GetNumAtts();
+				copy.Project (attsToKeep, numAttsToKeep, numAttsNow);
+				Schema sCopy = schemaLeft;
+				sCopy.Project(watt1);
+				vector <Attribute> attsToErase = sCopy.GetAtts();
+
+				stringstream s;
+				copy.print(s, sCopy);
+				string sc = "", ss = s.str();
+
+				for (int i = 0; i < attsToErase.size(); i++)
+				{
+					string insideLoop = attsToErase[i].name;
+					ss.erase (ss.find(insideLoop), insideLoop.size()+2);
+					sc+= ss;
+				}
+
+				auto it = List.find(s.str());
+				if(it != List.end())	List[sc].push_back(record);
+				else
+				{
+					vector <Record> v;
+					v.push_back(record);
+					List.insert (make_pair(sc, v));
+				}
+			}
+		}
+
 }
 
 Join::~Join() {
@@ -107,6 +208,107 @@ Join::~Join() {
 }
 
 bool Join::GetNext(Record& _record) {
+
+	Record recordLeft;
+
+	if (cntLeft > cntRight) {
+		while (1)
+		{
+			if (lastrec.GetSize() == 0)
+				if(!left -> GetNext(lastrec)) return false;
+
+			Record copy = lastrec;
+			int* attsToKeep = &watt1[0];
+			int numAttsToKeep = predicate.numAnds;
+			int numAttsNow = schemaLeft.GetNumAtts();
+			copy.Project (attsToKeep, numAttsToKeep, numAttsNow);
+			Schema sCopy = schemaLeft;
+			sCopy.Project(watt1);
+
+			vector <Attribute> attsToErase = sCopy.GetAtts();
+			stringstream s;
+			copy.print(s, sCopy);
+			string sc = "", ss = s.str();
+
+			for (int i = 0; i < attsToErase.size(); i++)
+			{
+				string insideLoop = attsToErase[i].name;
+				ss.erase (ss.find(insideLoop), insideLoop.size()+2);
+				sc+= ss;
+			}
+
+			auto it = List.find(sc);
+			if (it == List.end()) lastrec.Nullify();
+			else
+			{
+				if (it->second.size() == vecInd)
+				{
+					vecInd = 0;
+					if(!left -> GetNext(lastrec)) return false;
+				}
+
+				else
+				{
+					rLeft = it->second[vecInd];
+					vecInd++;
+					if (predicate.Run (lastrec, rLeft))
+					{
+						record.AppendRecords( lastrec, rLeft, schemaLeft.GetNumAtts(), schemaRight.GetNumAtts());
+						return true;
+					}
+				}
+			}
+		}
+	}
+	else {
+		while (1)
+		{
+			if (lastrec.GetSize() == 0)
+				if(!right -> GetNext(lastrec)) return false;
+
+			Record copy = lastrec;
+			int* attsToKeep = &watt2[0];
+			int numAttsToKeep = predicate.numAnds;
+			int numAttsNow = schemaRight.GetNumAtts();
+			copy.Project (attsToKeep, numAttsToKeep, numAttsNow);
+			Schema sCopy = schemaRight;
+			sCopy.Project(watt2);
+
+			vector <Attribute> attsToErase = sCopy.GetAtts();
+			stringstream s;
+			copy.print(s, sCopy);
+			string sc = "", ss = s.str();
+
+			for (int i = 0; i < attsToErase.size(); i++)
+			{
+				string insideLoop = attsToErase[i].name;
+				ss.erase (ss.find(insideLoop), insideLoop.size()+2);
+				sc+= ss;
+			}
+
+			auto it = List.find(sc);
+			if (it == List.end()) lastrec.Nullify();
+			else
+			{
+				if (it->second.size() == vecInd)
+				{
+					vecInd = 0;
+					if(!right -> GetNext(lastrec)) return false;
+				}
+
+				else
+				{
+					rLeft = it->second[vecInd];
+					vecInd++;
+					if (predicate.Run (rLeft, lastrec))
+					{
+						record.AppendRecords( rLeft, lastrec, schemaLeft.GetNumAtts(), schemaRight.GetNumAtts());
+						return true;
+					}
+				}
+			}
+		}
+	}
 
 }
 

@@ -139,6 +139,8 @@ private:
 	// operator generating data
 	RelationalOp* producer;
 
+	map <string, double> set;
+
 public:
 	DuplicateRemoval(Schema& _schema, RelationalOp* _producer);
 	virtual ~DuplicateRemoval();
@@ -185,6 +187,10 @@ private:
 
 	// operator generating data
 	RelationalOp* producer;
+
+	int phase;
+	map <string, double> set;
+	map <string, Record> recMap;
 
 public:
 	GroupBy(Schema& _schemaIn, Schema& _schemaOut, OrderMaker& _groupingAtts,
