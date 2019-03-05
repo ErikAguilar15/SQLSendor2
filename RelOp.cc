@@ -1,5 +1,6 @@
 #include <iostream>
 #include "RelOp.h"
+#include "Catalog.cc"
 
 using namespace std;
 
@@ -10,11 +11,16 @@ ostream& operator<<(ostream& _os, RelationalOp& _op) {
 
 
 Scan::Scan(Schema& _schema, DBFile& _file) {
-
+	schema = _schema;
+	file = _file;
 }
 
 Scan::~Scan() {
 
+}
+
+bool Scan::GetNext(Record& _record) {
+	return file.GetNext(_record);
 }
 
 ostream& Scan::print(ostream& _os) {
@@ -25,9 +31,25 @@ ostream& Scan::print(ostream& _os) {
 Select::Select(Schema& _schema, CNF& _predicate, Record& _constants,
 	RelationalOp* _producer) {
 
+		shema = _schema;
+		predicate = _predicate;
+		constants = _constants;
+		producer = _producer;
+
 }
 
 Select::~Select() {
+
+}
+
+bool Select::GetNext(Record& _record) {
+
+	if (!producer->GetNext(_record)) return false;
+	while (!predicate.Run(_record,constants))
+	{
+		if (!producer->GetNext(_record)) return false;
+	}
+	return true;
 
 }
 
@@ -39,9 +61,27 @@ ostream& Select::print(ostream& _os) {
 Project::Project(Schema& _schemaIn, Schema& _schemaOut, int _numAttsInput,
 	int _numAttsOutput, int* _keepMe, RelationalOp* _producer) {
 
+		schemaIn = _schemaIn;
+		schemaOut = _schemaOut;
+		numAttsInput = _numAttsInput;
+		numAttsOutput = _numAttsOutput;
+		keepMe = _keepMe;
+		producer = _producer;
+
 }
 
 Project::~Project() {
+
+}
+
+bool Project::GetNext(Record& _record) {
+
+	if (producer->GetNext(_record))
+	{
+		_record.Project(keepMe, numAttsOutput, numAttsInput);		
+		return true;
+	}
+	return false;
 
 }
 
