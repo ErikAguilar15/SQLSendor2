@@ -103,8 +103,6 @@ Join::Join(Schema& _schemaLeft, Schema& _schemaRight, Schema& _schemaOut,
 		cntLeft = 0;
 		cntRight = 0;
 		vecInd = 0;
-		Record lastrec;
-		Record record;
 
 		vector<int> watt1, watt2;
 		map <string, vector <Record> > List;
