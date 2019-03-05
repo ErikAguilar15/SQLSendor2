@@ -106,7 +106,7 @@ Join::~Join() {
 
 }
 
-virtual bool GetNext(Record& _record) {
+bool Join::GetNext(Record& _record) {
 
 }
 
