@@ -121,6 +121,15 @@ private:
 	RelationalOp* left;
 	RelationalOp* right;
 
+	int cntLeft;
+	int cntRight;
+	int vecInd;
+	Record lastrec;
+	Record record;
+
+	vector<int> watt1, watt2;
+	map <string, vector <Record> > List;
+
 public:
 	Join(Schema& _schemaLeft, Schema& _schemaRight, Schema& _schemaOut,
 		CNF& _predicate, RelationalOp* _left, RelationalOp* _right);
