@@ -126,7 +126,7 @@ DuplicateRemoval::~DuplicateRemoval() {
 
 }
 
-virtual bool GetNext(Record& _record) {
+bool DuplicateRemoval::GetNext(Record& _record) {
 
 	while(1){
 		if(! producer->GetNext(_record)){
@@ -162,7 +162,7 @@ Sum::~Sum() {
 
 }
 
-virtual bool GetNext(Record& _record) {
+bool Sum::GetNext(Record& _record) {
 	double doubleSum = 0;
 	int intSum = 0;
 
@@ -292,6 +292,22 @@ WriteOut::WriteOut(Schema& _schema, string& _outFile, RelationalOp* _producer) {
 }
 
 WriteOut::~WriteOut() {
+
+}
+
+bool WriteOut::GetNext(Record& _record) {
+
+	bool write = producer->GetNext(_record);
+	ofstream file;
+	file.open(&outFile);
+	if (!write)
+	{
+		file.close();
+		return false;
+	}
+	_record.print(file,schema);
+	file<<endl;
+	return write;
 
 }
 
