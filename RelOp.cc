@@ -100,9 +100,9 @@ Join::Join(Schema& _schemaLeft, Schema& _schemaRight, Schema& _schemaOut,
 		left = _left;
 		right = _right;
 
-		int cntLeft = 0;
-		int cntRight = 0;
-		int vecInd = 0;
+		cntLeft = 0;
+		cntRight = 0;
+		vecInd = 0;
 		Record lastrec;
 		Record record;
 
