@@ -44,7 +44,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 
 		//Check Att list
 		if (cnf.numAnds > 0) {
-
+			
 		}
 
 		tables = tables->next;
@@ -61,6 +61,123 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 	join->SetNoPages(pNum);
 
 	// create the remaining operators based on the query
+	if (_finalFunction != NULL) {
+		Schema projectSchema;
+		join->returnSchema(projectSchema);
+		vector<Attribute> projectAtts = projSch.GetAtts();
+		NameList* attsToSelect = _attsToSelect;
+		int numAttsInput = projectSchema.GetNumAtts(), numAttsOutput = 0;
+		Schema projectSchemaOut = projectSchema;
+		vector<int> keep;
+
+		//While there are attributes to select
+		while (attsToSelect != NULL) {
+			string str(attsToSelect->name);
+			keep.push_back(projectSchema.Index(str));
+			attsToSelect = attsToSelect->next;
+			numAttsOutput++;
+		}
+
+		int* keepSize = new int [keep.size()];
+		for (int i = 0;i < keep.size(); i++) keepSize[i] = keep[i];
+
+		projectSchemaOut.Project(keep);
+		Project* project = new Project (projectSchema, projectSchemaOut, numAttsInput, numAttsOutput, keepSize, join);
+
+		join = (RelationalOp*) project;
+
+		//If there is a distinct run duplicate removal
+		if (_distinctAtts == 1) {
+			Schema dupSchema;
+			join->returnSchema(dupSchema);
+			DuplicateRemoval* duplicateRemoval = new DuplicateRemoval(dupSchema, join);
+			join = (RelationalOp*) duplicateRemoval;
+		}
+	}
+	else {
+		//Check if no group by
+		if (_groupingAtts == NULL) {
+			Schema schemaIn, schemaIn0;
+			join->returnSchema(schemaIn0);
+			schemaIn = schemaIn0;
+
+			Function compute;
+			FuncOperator* finalFunction = _finalFunction;
+			compute.GrowFromParseTree(finalFunction, schemaIn0);
+
+			vector<string> attributes, attributeTypes;
+			vector<unsigned int> distincts;
+			attributes.push_back("Sum");
+			attributeTypes.push_back("FLOAT");
+			distincts.push_back(1);
+			Schema schOutSum(attributes, attributeTypes, distincts);
+
+			Sum* sum = new Sum (schIn, schOutSum, compute, join);
+			join = (RelationalOp*) sum;
+		}
+		else {
+			Schema schemaIn, schemaIn0;
+			join->returnSchema(schemaIn0);
+			schemaIn = schemaIn0;
+
+			NameList* grouping = _groupingAtts;
+			int numAtts = 0;
+			vector<int> keep;
+
+			vector<string> attributes, attributeTypes;
+			vector<unsigned int> distincts;
+			attributes.push_back("Sum");
+			attributeTypes.push_back("FLOAT");
+			distincts.push_back(1);
+
+			while(grouping != NULL) {
+				string str(grouping->name);
+				keepMe.push_back(schIn_.Index(str));
+				attributes.push_back(str);
+
+				Type type;
+				type = schIn_.FindType(str);
+
+				switch(type) {
+					case Integer:	attributeTypes.push_back("INTEGER");
+					break;
+					case Float:	attributeTypes.push_back("FLOAT");
+					break;
+					case String:	attributeTypes.push_back("STRING");
+					break;
+					default:	attributeTypes.push_back("UNKNOWN");
+					break;
+				}
+
+				distincts.push_back(schIn_.GetDistincts(str));
+				grouping = grouping->next;
+				numAtts++;
+			}
+
+			int * keepSize = new int [keep.size()];
+			for (int i = 0; i < keepMe.size(); i++) {
+				keepSize[i] = keep[i];
+			}
+
+			Schema schemaOut(attributes, attributeTypes, distincts);
+			OrderMaker groupingAtts(schemaIn0, keepSize, numAtts);
+
+			Function compute;
+			FuncOperator* finalFunction = _finalFunction;
+			compute.GrowFromParseTree(finalFunction, schemaIn);
+
+			GroupBy* groupBy = new GroupBy (schIn, schOut, groupingAtts, compute, join);
+			join = (RelationalOp*) groupBy;
+		}
+
+		Schema finalSchema;
+		join->returnSchema(finalSchema);
+		string outFile = "Output.txt";
+
+		WriteOut * writeout = new WriteOut(finalSchema, outFile, join);
+		join = (RelationalOp*) writeout;
+
+	}
 
 	// connect everything in the query execution tree and return
 	_queryTree.SetRoot(*join)
