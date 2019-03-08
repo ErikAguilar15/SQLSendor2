@@ -205,11 +205,6 @@ void QueryOptimizer::Optimize(TableList* _tables, AndList* _predicate,
 	_root = new OptimizationTree;
 	_root -> leftChild = NULL;
 	_root -> rightChild = NULL;
-	for (int i = 0; i < tabList.size(); i++) {
-		_root -> tables.push_back(mapping[ {tabList[i]} ] );
-	}
-
-	cout<<endl<<endl;
 	_root -> noTuples = Map[tabList].size;
 	tabList = Map[tabList].order;
 	treeGenerator(tabList, _root);
@@ -245,9 +240,6 @@ void QueryOptimizer::treeGenerator(string tabList, OptimizationTree* & _root)
 		return;
 	}
 
-	for (int i = 0; i<tabList.size(); i++)
-		_root -> tables.push_back(mapping[ {tabList[i]} ]);
-
 	if (tabList.size() == 1)
 	{
 		_root -> noTuples = Map[tabList].size;
@@ -260,13 +252,13 @@ void QueryOptimizer::treeGenerator(string tabList, OptimizationTree* & _root)
 	_root -> leftChild -> leftChild = NULL;
 	_root -> leftChild -> rightChild = NULL;
 	_root -> leftChild -> tables.push_back(_root -> tables[0]);
-	_root -> leftChild -> noTuples = Map[{tabList[0]}].size;
+	_root -> leftChild -> noTuples = Map[tabList].size;
 
 	_root -> rightChild = new OptimizationTree;
 	_root -> rightChild -> leftChild = NULL;
 	_root -> rightChild -> rightChild = NULL;
 	_root -> rightChild -> tables.push_back(_root -> tables[1]);
-	_root -> rightChild -> noTuples = Map[{tabList[1]}].size;
+	_root -> rightChild -> noTuples = Map[tabList].size;
 
 }
 
