@@ -55,7 +55,7 @@ bool Select::GetNext(Record& _record) {
 }
 
 ostream& Select::print(ostream& _os) {
-	return _os << "SELECT";
+	return _os << "(SELECT <- " << *producer << ")";
 }
 
 
@@ -87,7 +87,7 @@ bool Project::GetNext(Record& _record) {
 }
 
 ostream& Project::print(ostream& _os) {
-	return _os << "PROJECT";
+	return _os << "PROJECT (" << *producer << ")";
 }
 
 
@@ -312,7 +312,7 @@ bool Join::GetNext(Record& _record) {
 }
 
 ostream& Join::print(ostream& _os) {
-	return _os << "JOIN";
+	return _os << "JOIN (" << *left << " & " << *right << ")";
 }
 
 
@@ -345,7 +345,7 @@ bool DuplicateRemoval::GetNext(Record& _record) {
 }
 
 ostream& DuplicateRemoval::print(ostream& _os) {
-	return _os << "DISTINCT";
+	return _os << "DISTINCT (" << *producer << ")";
 }
 
 
@@ -394,7 +394,7 @@ bool Sum::GetNext(Record& _record) {
 }
 
 ostream& Sum::print(ostream& _os) {
-	return _os << "SUM";
+	return _os << "SUM (" << *producer << ")";
 }
 
 
@@ -479,7 +479,7 @@ bool GroupBy::GetNext(Record& _record){
 }
 
 ostream& GroupBy::print(ostream& _os) {
-	return _os << "GROUP BY";
+	eturn _os << "GROUP BY (" << *producer << ")";
 }
 
 
@@ -513,10 +513,14 @@ bool WriteOut::GetNext(Record& _record) {
 }
 
 ostream& WriteOut::print(ostream& _os) {
-	return _os << "OUTPUT";
+	return _os << "OUTPUT:\n{\n\t" << *producer <<"\n}\n";
 }
 
 
 ostream& operator<<(ostream& _os, QueryExecutionTree& _op) {
-	return _os << "QUERY EXECUTION TREE";
+	Record r;
+	unsigned long recs = 0;
+	while (_op.root->GetNext(r)) recs++;
+
+	return _os << "{\n\tWritten " << recs <<" records in the file 'Output_File.txt'.\n}\n";
 }
