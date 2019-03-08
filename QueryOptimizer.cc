@@ -207,4 +207,3 @@ void QueryOptimizer::Optimize(TableList* _tables, AndList* _predicate,
 	cout<<endl<<endl;
 	_root -> noTuples = Map[tabList].size;
 	tabList = Map[tabList].order;
-	treeGenerator(tabList, _root);
