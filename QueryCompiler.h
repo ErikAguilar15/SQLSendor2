@@ -30,6 +30,8 @@ public:
 		FuncOperator* _finalFunction, AndList* _predicate,
 		NameList* _groupingAtts, int& _distinctAtts,
 		QueryExecutionTree& _queryTree);
+
+	RelationalOp* constTree(OptimizationTree* root, AndList* _predicate);
 };
 
 #endif // _QUERY_COMPILER_H

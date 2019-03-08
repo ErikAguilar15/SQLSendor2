@@ -192,3 +192,104 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 
 	// free the memory occupied by the parse tree since it is not necessary anymore
 }
+
+RelationalOp* QueryCompiler::constTree(OptimizationTree* root, AndList* _predicate) {
+	if (root -> leftChild == NULL && root -> rightChild == NULL)
+	{
+		if(checkindex == 1) return (RelationalOp*) & si[0];
+		RelationalOp* op;
+		auto it = selectz.find(root -> tables[0]);
+		if(it != selectz.end())		op = (RelationalOp*) & it->second;
+		else				op = (RelationalOp*) & scanz.at(it->first);
+
+
+		return op;
+	}
+
+	if (root -> leftChild -> tables.size() == 1  && root -> rightChild -> tables.size() == 1)
+	{
+		string left = root -> leftChild -> tables[0];
+		string right = root -> rightChild -> tables[0];
+
+		CNF cnf;
+		Schema sch1, sch2;
+		RelationalOp* lop, *rop;
+
+		auto it = selectz.find(left);
+		if(it != selectz.end())		lop = (RelationalOp*) & it->second;
+		else				lop = (RelationalOp*) & scanz.at(left);
+
+		it = selectz.find(right);
+		if(it != selectz.end()) 	rop = (RelationalOp*) & it->second;
+		else				rop = (RelationalOp*) & scanz.at(right);
+
+		lop->returnSchema(sch1);
+		rop->returnSchema(sch2);
+
+		cnf.ExtractCNF (*_predicate, sch1, sch2);
+		Schema schout = sch1;
+		schout.Append(sch2);
+		Join* join = new Join(sch1, sch2, schout, cnf, lop , rop);
+		return ((RelationalOp*) join);
+
+	}
+
+	if (root -> leftChild -> tables.size() == 1)
+	{
+		string left = root -> leftChild -> tables[0];
+		Schema sch1,sch2;
+		CNF cnf;
+		RelationalOp* lop;
+
+		auto it = selectz.find(left);
+		if(it != selectz.end())		lop = (RelationalOp*) & it->second;
+		else				lop = (RelationalOp*) & scanz.at(left);
+
+		lop->returnSchema(sch1);
+		RelationalOp* rop = constTree(root -> rightChild, _predicate);
+		rop->returnSchema(sch2);
+
+		cnf.ExtractCNF (*_predicate, sch1, sch2);
+		Schema schout = sch1;
+		schout.Append(sch2);
+		Join* join = new Join(sch1, sch2, schout, cnf, lop , rop);
+		return ((RelationalOp*) join);
+	}
+
+	if (root -> rightChild -> tables.size() == 1)
+	{
+		string right = root -> rightChild -> tables[0];
+		Schema sch1,sch2;
+		CNF cnf;
+		RelationalOp* rop;
+
+		auto it = selectz.find(right);
+		if(it != selectz.end())		rop = (RelationalOp*) & it->second;
+		else				rop = (RelationalOp*) & scanz.at(right);
+
+		rop->returnSchema(sch2);
+		RelationalOp* lop = constTree(root -> leftChild, _predicate);
+		lop->returnSchema(sch1);
+
+		cnf.ExtractCNF (*_predicate, sch1, sch2);
+		Schema schout = sch1;
+		schout.Append(sch2);
+		Join* join = new Join(sch1, sch2, schout, cnf, lop , rop);
+		return ((RelationalOp*) join);
+	}
+
+	Schema sch1,sch2;
+	CNF cnf;
+	RelationalOp* lop = constTree(root -> leftChild, _predicate);
+	RelationalOp* rop = constTree(root -> rightChild, _predicate);
+
+	lop->returnSchema(sch1);
+	rop->returnSchema(sch2);
+
+	cnf.ExtractCNF (*_predicate, sch1, sch2);
+	Schema schout = sch1;
+	schout.Append(sch2);
+	Join* join = new Join(sch1, sch2, schout, cnf, lop , rop);
+	return ((RelationalOp*) join);
+
+}

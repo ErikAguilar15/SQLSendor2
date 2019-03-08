@@ -31,6 +31,16 @@ class QueryOptimizer {
 private:
 	Catalog* catalog;
 
+	struct plan{
+		unsigned long long size;
+		unsigned long long cost;
+		string order;
+		Schema sch;
+	};
+
+	map <string, plan> Map;
+	map <string, string> mapping;
+
 public:
 	QueryOptimizer(Catalog& _catalog);
 	virtual ~QueryOptimizer();
