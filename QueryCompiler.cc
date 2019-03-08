@@ -36,15 +36,18 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 		//db.Open(&tab[0]); db.MoveFirst();
 
 		//Append scanned table to map of scanned tables
-		scanMap.insert (make_pair(tab,Scan(sch,db)));
+		scanMap.insert (make_pair(tab,Scan(schema,db)));
 
 		CNF cnf;
-		Record rec;
-		cnf.ExtractCNF (*_predicate, sch, rec);
+		Record record;
+		cnf.ExtractCNF (*_predicate, schema, record);
+
+		Select select(sch, cnf , rec ,(RelationalOp*) & scanMap.at(tab));
+		selectMap.insert (make_pair(tab,select) );
 
 		//Check Att list
 		if (cnf.numAnds > 0) {
-			
+
 		}
 
 		tables = tables->next;
@@ -81,6 +84,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 		int* keepSize = new int [keep.size()];
 		for (int i = 0;i < keep.size(); i++) keepSize[i] = keep[i];
 
+		//Regular Query run project
 		projectSchemaOut.Project(keep);
 		Project* project = new Project (projectSchema, projectSchemaOut, numAttsInput, numAttsOutput, keepSize, join);
 
@@ -95,7 +99,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 		}
 	}
 	else {
-		//Check if no group by
+		//Aggregate query
 		if (_groupingAtts == NULL) {
 			Schema schemaIn, schemaIn0;
 			join->returnSchema(schemaIn0);
@@ -166,6 +170,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 			FuncOperator* finalFunction = _finalFunction;
 			compute.GrowFromParseTree(finalFunction, schemaIn);
 
+			//GroupBy Query
 			GroupBy* groupBy = new GroupBy (schIn, schOut, groupingAtts, compute, join);
 			join = (RelationalOp*) groupBy;
 		}
@@ -174,6 +179,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 		join->returnSchema(finalSchema);
 		string outFile = "Output.txt";
 
+		//End with a write out
 		WriteOut * writeout = new WriteOut(finalSchema, outFile, join);
 		join = (RelationalOp*) writeout;
 

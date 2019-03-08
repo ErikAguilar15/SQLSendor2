@@ -47,4 +47,12 @@ void DBFile::AppendRecord (Record& rec) {
 }
 
 int DBFile::GetNext (Record& rec) {
+	if (page.GetFirst(rec) == 0) {
+		if (file.GetLength() == pageNumb) return 0;
+		if (file.GetPage(page, pageNumb) == -1) return 0;
+		page.GetFirst(rec);
+		pageNumb++;
+
+	}
+	return 1;
 }
