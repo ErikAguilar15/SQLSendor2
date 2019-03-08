@@ -46,6 +46,10 @@ public:
 	virtual ~QueryOptimizer();
 
 	void Optimize(TableList* _tables, AndList* _predicate, OptimizationTree* _root);
+	bool permutation(string& out);
+	void Partition(string tables, AndList* _predicate);
+	void treeGenerator(string tabList, OptimizationTree* & _root);
+	void treeDisp(OptimizationTree* & _root);
 };
 
 #endif // _QUERY_OPTIMIZER_H
