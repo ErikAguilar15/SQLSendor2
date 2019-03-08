@@ -479,7 +479,7 @@ bool GroupBy::GetNext(Record& _record){
 }
 
 ostream& GroupBy::print(ostream& _os) {
-	eturn _os << "GROUP BY (" << *producer << ")";
+	return _os << "GROUP BY (" << *producer << ")";
 }
 
 

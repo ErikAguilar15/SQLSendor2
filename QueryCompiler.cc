@@ -13,6 +13,8 @@ using namespace std;
 
 map <string, Scan> scanMap;
 map <string, Select> selectMap;
+int pageNum = 10;
+int checkindex = 0;
 
 QueryCompiler::QueryCompiler(Catalog& _catalog, QueryOptimizer& _optimizer) :
 	catalog(&_catalog), optimizer(&_optimizer) {
@@ -196,11 +198,10 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 RelationalOp* QueryCompiler::constTree(OptimizationTree* root, AndList* _predicate) {
 	if (root -> leftChild == NULL && root -> rightChild == NULL)
 	{
-		if(checkindex == 1) return (RelationalOp*) & si[0];
 		RelationalOp* op;
-		auto it = selectz.find(root -> tables[0]);
-		if(it != selectz.end())		op = (RelationalOp*) & it->second;
-		else				op = (RelationalOp*) & scanz.at(it->first);
+		auto it = selectMap.find(root -> tables[0]);
+		if(it != selectMap.end())		op = (RelationalOp*) & it->second;
+		else				op = (RelationalOp*) & scanMap.at(it->first);
 
 
 		return op;
@@ -215,13 +216,13 @@ RelationalOp* QueryCompiler::constTree(OptimizationTree* root, AndList* _predica
 		Schema sch1, sch2;
 		RelationalOp* lop, *rop;
 
-		auto it = selectz.find(left);
-		if(it != selectz.end())		lop = (RelationalOp*) & it->second;
-		else				lop = (RelationalOp*) & scanz.at(left);
+		auto it = selectMap.find(left);
+		if(it != selectMap.end())		lop = (RelationalOp*) & it->second;
+		else				lop = (RelationalOp*) & scanMap.at(left);
 
-		it = selectz.find(right);
-		if(it != selectz.end()) 	rop = (RelationalOp*) & it->second;
-		else				rop = (RelationalOp*) & scanz.at(right);
+		it = selectMap.find(right);
+		if(it != selectMap.end()) 	rop = (RelationalOp*) & it->second;
+		else				rop = (RelationalOp*) & scanMap.at(right);
 
 		lop->returnSchema(sch1);
 		rop->returnSchema(sch2);
@@ -241,9 +242,9 @@ RelationalOp* QueryCompiler::constTree(OptimizationTree* root, AndList* _predica
 		CNF cnf;
 		RelationalOp* lop;
 
-		auto it = selectz.find(left);
-		if(it != selectz.end())		lop = (RelationalOp*) & it->second;
-		else				lop = (RelationalOp*) & scanz.at(left);
+		auto it = selectMap.find(left);
+		if(it != selectMap.end())		lop = (RelationalOp*) & it->second;
+		else				lop = (RelationalOp*) & scanMap.at(left);
 
 		lop->returnSchema(sch1);
 		RelationalOp* rop = constTree(root -> rightChild, _predicate);
@@ -263,9 +264,9 @@ RelationalOp* QueryCompiler::constTree(OptimizationTree* root, AndList* _predica
 		CNF cnf;
 		RelationalOp* rop;
 
-		auto it = selectz.find(right);
-		if(it != selectz.end())		rop = (RelationalOp*) & it->second;
-		else				rop = (RelationalOp*) & scanz.at(right);
+		auto it = selectMap.find(right);
+		if(it != selectMap.end())		rop = (RelationalOp*) & it->second;
+		else				rop = (RelationalOp*) & scanMap.at(right);
 
 		rop->returnSchema(sch2);
 		RelationalOp* lop = constTree(root -> leftChild, _predicate);
