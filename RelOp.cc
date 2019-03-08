@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include "RelOp.h"
 #include "Catalog.cc"
 
@@ -31,7 +32,7 @@ ostream& Scan::print(ostream& _os) {
 Select::Select(Schema& _schema, CNF& _predicate, Record& _constants,
 	RelationalOp* _producer) {
 
-		shema = _schema;
+		schema = _schema;
 		predicate = _predicate;
 		constants = _constants;
 		producer = _producer;
@@ -110,13 +111,13 @@ Join::Join(Schema& _schemaLeft, Schema& _schemaRight, Schema& _schemaOut,
 		vector<Attribute> attsLeft = _schemaLeft.GetAtts();
 		vector<Attribute> attsRight = _schemaRight.GetAtts();
 		for (auto a:attsLeft) {
-			if (_schemaLeft.GetDistincts(a.name) > countL)	countL = _schemaLeft.GetDistincts(a.name);
+			if (_schemaLeft.GetDistincts(a.name) > cntLeft)	cntLeft = _schemaLeft.GetDistincts(a.name);
 		}
 		for (auto a:attsRight) {
-			if (_schemaRight.GetDistincts(a.name) > countR)	countR = _schemaRight.GetDistincts(a.name);
+			if (_schemaRight.GetDistincts(a.name) > cntRight)	cntRight = _schemaRight.GetDistincts(a.name);
 		}
 
-		if (predicate.andList[predicate.numAnds - 1].operand == Left) {
+		if (predicate.andList[predicate.numAnds - 1].operand1 == Left) {
 			for (int i = 0; i < predicate.numAnds; i++) {
 				watt1.push_back(predicate.andList[i].whichAtt1);
 				watt2.push_back(predicate.andList[i].whichAtt2);
@@ -198,7 +199,7 @@ Join::Join(Schema& _schemaLeft, Schema& _schemaRight, Schema& _schemaOut,
 				}
 			}
 		}
-
+	}
 }
 
 Join::~Join() {
@@ -247,11 +248,11 @@ bool Join::GetNext(Record& _record) {
 
 				else
 				{
-					rLeft = it->second[vecInd];
+					recordLeft = it->second[vecInd];
 					vecInd++;
-					if (predicate.Run (lastrec, rLeft))
+					if (predicate.Run (lastrec, recordLeft))
 					{
-						record.AppendRecords( lastrec, rLeft, schemaLeft.GetNumAtts(), schemaRight.GetNumAtts());
+						record.AppendRecords( lastrec, recordLeft, schemaLeft.GetNumAtts(), schemaRight.GetNumAtts());
 						return true;
 					}
 				}
@@ -296,11 +297,11 @@ bool Join::GetNext(Record& _record) {
 
 				else
 				{
-					rLeft = it->second[vecInd];
+					recordLeft = it->second[vecInd];
 					vecInd++;
-					if (predicate.Run (rLeft, lastrec))
+					if (predicate.Run (recordLeft, lastrec))
 					{
-						record.AppendRecords( rLeft, lastrec, schemaLeft.GetNumAtts(), schemaRight.GetNumAtts());
+						record.AppendRecords( recordLeft, lastrec, schemaLeft.GetNumAtts(), schemaRight.GetNumAtts());
 						return true;
 					}
 				}
@@ -333,11 +334,11 @@ bool DuplicateRemoval::GetNext(Record& _record) {
 			return false;
 		}
 		stringstream ss;
-		_record.print(ss, _schema);
+		_record.print(ss, schema);
 		auto iterator = set.find(ss.str());
 
 		if(iterator == set.end()){
-			set[ss.str()] = _record;
+			//set[ss.str()] = _record; FIX
 			return true;
 		}
 	}
@@ -416,14 +417,14 @@ GroupBy::~GroupBy() {
 bool GroupBy::GetNext(Record& _record){
 
 	vector<int> attsToKeep, attsToKeep1;
-	for (int i = 1; i < _schemaOut.GetNumAtts(); i++)
+	for (int i = 1; i < schemaOut.GetNumAtts(); i++)
 		attsToKeep.push_back(i);
 
-	Schema copy = _schemaOut;
+	Schema copy = schemaOut;
 	copy.Project(attsToKeep);
 
 	attsToKeep1.push_back(0);
-	Schema sum = _schemaOut;
+	Schema sum = schemaOut;
 	sum.Project(attsToKeep1);
 
 	if (phase == 0)
@@ -437,14 +438,14 @@ bool GroupBy::GetNext(Record& _record){
 			double val = doubleResult + (double)intResult;
 
 			_record.Project(&groupingAtts.whichAtts[0], groupingAtts.numAtts , copy.GetNumAtts());
-			_record.print(s, copy);
+			_record.print(ss, copy);
 			auto iterator = set.find(ss.str());
 
 			if(iterator != set.end())	set[ss.str()]+= val;
 			else
 			{
 				set[ss.str()] = val;
-				recMap[ss.str()] = record;
+				recMap[ss.str()] = _record;
 			}
 
 		}
@@ -469,10 +470,10 @@ bool GroupBy::GetNext(Record& _record){
 		delete [] recSpace;
 
 		Record newRec;
-		newRec.AppendRecords(sumRec, temp, 1, _schemaOut.GetNumAtts()-1);
+		newRec.AppendRecords(sumRec, temp, 1, schemaOut.GetNumAtts()-1);
 		recMap.erase(strr);
 		set.erase(strr);
-		record = newRec;
+		_record = newRec;
 		return true;
 	}
 }
@@ -489,6 +490,8 @@ WriteOut::WriteOut(Schema& _schema, string& _outFile, RelationalOp* _producer) {
 	producer = _producer;
 	schema = _schema;
 
+	file.open(&outFile[0]);
+
 }
 
 WriteOut::~WriteOut() {
@@ -498,8 +501,6 @@ WriteOut::~WriteOut() {
 bool WriteOut::GetNext(Record& _record) {
 
 	bool write = producer->GetNext(_record);
-	ofstream file;
-	file.open(&outFile);
 	if (!write)
 	{
 		file.close();

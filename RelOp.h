@@ -2,6 +2,8 @@
 #define _REL_OP_H
 
 #include <iostream>
+#include <fstream>
+#include <map>
 
 #include "Schema.h"
 #include "Record.h"
@@ -26,6 +28,7 @@ public:
 
 	// every operator has to implement this method
 	virtual bool GetNext(Record& _record) = 0;
+	virtual void returnSchema(Schema& _schema) = 0;
 
 	/* Virtual function for polymorphic printing using operator<<.
 	 * Each operator has to implement its specific version of print.
@@ -49,7 +52,9 @@ public:
 	Scan(Schema& _schema, DBFile& _file);
 	virtual ~Scan();
 
-	virtual bool GetNext(Record& _record) {}
+	virtual bool GetNext(Record& _record);
+
+	virtual void returnSchema (Schema& _schema){_schema = schema;}
 
 	virtual ostream& print(ostream& _os);
 };
@@ -72,7 +77,9 @@ public:
 		RelationalOp* _producer);
 	virtual ~Select();
 
-	virtual bool GetNext(Record& _record) {}
+	virtual bool GetNext(Record& _record);
+
+	virtual void returnSchema (Schema& _schema){_schema = schema;}
 
 	virtual ostream& print(ostream& _os);
 };
@@ -100,7 +107,9 @@ public:
 		int _numAttsOutput, int* _keepMe, RelationalOp* _producer);
 	virtual ~Project();
 
-	virtual bool GetNext(Record& _record) {}
+	virtual bool GetNext(Record& _record);
+
+	virtual void returnSchema (Schema& _schema){_schema = schemaOut;}
 
 	virtual ostream& print(ostream& _os);
 };
@@ -135,7 +144,9 @@ public:
 		CNF& _predicate, RelationalOp* _left, RelationalOp* _right);
 	virtual ~Join();
 
-	virtual bool GetNext(Record& _record) {}
+	virtual bool GetNext(Record& _record);
+
+	virtual void returnSchema (Schema& _schema){_schema = schemaOut;}
 
 	virtual ostream& print(ostream& _os);
 };
@@ -154,7 +165,9 @@ public:
 	DuplicateRemoval(Schema& _schema, RelationalOp* _producer);
 	virtual ~DuplicateRemoval();
 
-	virtual bool GetNext(Record& _record) {}
+	virtual bool GetNext(Record& _record);
+
+	virtual void returnSchema (Schema& _schema){_schema = schema;}
 
 	virtual ostream& print(ostream& _os);
 };
@@ -177,7 +190,9 @@ public:
 		RelationalOp* _producer);
 	virtual ~Sum();
 
-	virtual bool GetNext(Record& _record) {}
+	virtual bool GetNext(Record& _record);
+
+	virtual void returnSchema (Schema& _schema){_schema = schemaOut;}
 
 	virtual ostream& print(ostream& _os);
 };
@@ -206,7 +221,9 @@ public:
 		Function& _compute,	RelationalOp* _producer);
 	virtual ~GroupBy();
 
-	virtual bool GetNext(Record& _record) {}
+	virtual bool GetNext(Record& _record);
+
+	virtual void returnSchema (Schema& _schema){_schema = schemaOut;}
 
 	virtual ostream& print(ostream& _os);
 };
@@ -222,11 +239,15 @@ private:
 	// operator generating data
 	RelationalOp* producer;
 
+	ofstream file;
+
 public:
 	WriteOut(Schema& _schema, string& _outFile, RelationalOp* _producer);
 	virtual ~WriteOut();
 
-	virtual bool GetNext(Record& _record) {}
+	virtual bool GetNext(Record& _record);
+
+	virtual void returnSchema (Schema& _schema){_schema = schema;}
 
 	virtual ostream& print(ostream& _os);
 };

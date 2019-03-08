@@ -16,6 +16,10 @@ private:
 	File file;
 	string fileName;
 
+	Page page;
+	int pageNum;
+	FileType ftype;
+
 public:
 	DBFile ();
 	virtual ~DBFile ();

@@ -7,6 +7,7 @@
 #include "Comparison.h"
 #include "Function.h"
 #include "RelOp.h"
+#include <map>
 
 using namespace std;
 
@@ -27,23 +28,23 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 
 	// create a SCAN operator for each table in the query
 	TableList * tables = _tables;
-	DBFile db
+	DBFile db;
 	while (tables != NULL) {
 		Schema schema;
 		string tabName = tables->tableName;
-		catalog.GetSchema(tabName, schema);
+		catalog->GetSchema(tabName, schema);
 
 		//db.Open(&tab[0]); db.MoveFirst();
 
 		//Append scanned table to map of scanned tables
-		scanMap.insert (make_pair(tab,Scan(schema,db)));
+		scanMap.insert (make_pair(tabName,Scan(schema,db)));
 
 		CNF cnf;
 		Record record;
 		cnf.ExtractCNF (*_predicate, schema, record);
 
-		Select select(sch, cnf , rec ,(RelationalOp*) & scanMap.at(tab));
-		selectMap.insert (make_pair(tab,select) );
+		Select select(schema, cnf , record ,(RelationalOp*) & scanMap.at(tabName));
+		selectMap.insert (make_pair(tabName,select) );
 
 		//Check Att list
 		if (cnf.numAnds > 0) {
@@ -58,16 +59,17 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 	// call the optimizer to compute the join order
 	OptimizationTree* root;
 	optimizer->Optimize(_tables, _predicate, root);
+	OptimizationTree* rootCopy = root;
 
 	// create join operators based on the optimal order computed by the optimizer
 	RelationalOp* join = constTree(rootCopy, _predicate);
-	join->SetNoPages(pNum);
+	join->SetNoPages(pageNum);
 
 	// create the remaining operators based on the query
 	if (_finalFunction != NULL) {
 		Schema projectSchema;
 		join->returnSchema(projectSchema);
-		vector<Attribute> projectAtts = projSch.GetAtts();
+		vector<Attribute> projectAtts = projectSchema.GetAtts();
 		NameList* attsToSelect = _attsToSelect;
 		int numAttsInput = projectSchema.GetNumAtts(), numAttsOutput = 0;
 		Schema projectSchemaOut = projectSchema;
@@ -116,7 +118,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 			distincts.push_back(1);
 			Schema schOutSum(attributes, attributeTypes, distincts);
 
-			Sum* sum = new Sum (schIn, schOutSum, compute, join);
+			Sum* sum = new Sum (schemaIn, schOutSum, compute, join);
 			join = (RelationalOp*) sum;
 		}
 		else {
@@ -136,11 +138,11 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 
 			while(grouping != NULL) {
 				string str(grouping->name);
-				keepMe.push_back(schIn_.Index(str));
+				keep.push_back(schemaIn0.Index(str));
 				attributes.push_back(str);
 
 				Type type;
-				type = schIn_.FindType(str);
+				type = schemaIn0.FindType(str);
 
 				switch(type) {
 					case Integer:	attributeTypes.push_back("INTEGER");
@@ -153,13 +155,13 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 					break;
 				}
 
-				distincts.push_back(schIn_.GetDistincts(str));
+				distincts.push_back(schemaIn0.GetDistincts(str));
 				grouping = grouping->next;
 				numAtts++;
 			}
 
 			int * keepSize = new int [keep.size()];
-			for (int i = 0; i < keepMe.size(); i++) {
+			for (int i = 0; i < keep.size(); i++) {
 				keepSize[i] = keep[i];
 			}
 
@@ -171,22 +173,22 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 			compute.GrowFromParseTree(finalFunction, schemaIn);
 
 			//GroupBy Query
-			GroupBy* groupBy = new GroupBy (schIn, schOut, groupingAtts, compute, join);
+			GroupBy* groupBy = new GroupBy (schemaIn, schemaOut, groupingAtts, compute, join);
 			join = (RelationalOp*) groupBy;
 		}
 
 		Schema finalSchema;
 		join->returnSchema(finalSchema);
-		string outFile = "Output.txt";
+		//string outFile = "Output.txt";
 
 		//End with a write out
-		WriteOut * writeout = new WriteOut(finalSchema, outFile, join);
-		join = (RelationalOp*) writeout;
+		//WriteOut * writeout = new WriteOut(finalSchema, outFile, join);
+		//join = (RelationalOp*) writeout;
 
 	}
 
 	// connect everything in the query execution tree and return
-	_queryTree.SetRoot(*join)
+	_queryTree.SetRoot(*join);
 
 	// free the memory occupied by the parse tree since it is not necessary anymore
 }
