@@ -13,7 +13,6 @@ using namespace std;
 
 map <string, Scan> scanMap;
 map <string, Select> selectMap;
-int pageNum = 10;
 int checkindex = 0;
 
 QueryCompiler::QueryCompiler(Catalog& _catalog, QueryOptimizer& _optimizer) :
@@ -64,8 +63,8 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 	OptimizationTree* rootCopy = root;
 
 	// create join operators based on the optimal order computed by the optimizer
-	RelationalOp* join = constTree(rootCopy, _predicate);
-	join->SetNoPages(pageNum);
+	RelationalOp* join;
+	//Create Join Tree
 
 	// create the remaining operators based on the query
 	if (_finalFunction != NULL) {
@@ -193,104 +192,4 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 	_queryTree.SetRoot(*join);
 
 	// free the memory occupied by the parse tree since it is not necessary anymore
-}
-
-RelationalOp* QueryCompiler::constTree(OptimizationTree* root, AndList* _predicate) {
-	if (root -> leftChild == NULL && root -> rightChild == NULL)
-	{
-		RelationalOp* op;
-		auto it = selectMap.find(root -> tables[0]);
-		if(it != selectMap.end())		op = (RelationalOp*) & it->second;
-		else				op = (RelationalOp*) & scanMap.at(it->first);
-
-
-		return op;
-	}
-
-	if (root -> leftChild -> tables.size() == 1  && root -> rightChild -> tables.size() == 1)
-	{
-		string left = root -> leftChild -> tables[0];
-		string right = root -> rightChild -> tables[0];
-
-		CNF cnf;
-		Schema sch1, sch2;
-		RelationalOp* lop, *rop;
-
-		auto it = selectMap.find(left);
-		if(it != selectMap.end())		lop = (RelationalOp*) & it->second;
-		else				lop = (RelationalOp*) & scanMap.at(left);
-
-		it = selectMap.find(right);
-		if(it != selectMap.end()) 	rop = (RelationalOp*) & it->second;
-		else				rop = (RelationalOp*) & scanMap.at(right);
-
-		lop->returnSchema(sch1);
-		rop->returnSchema(sch2);
-
-		cnf.ExtractCNF (*_predicate, sch1, sch2);
-		Schema schout = sch1;
-		schout.Append(sch2);
-		Join* join = new Join(sch1, sch2, schout, cnf, lop , rop);
-		return ((RelationalOp*) join);
-
-	}
-
-	if (root -> leftChild -> tables.size() == 1)
-	{
-		string left = root -> leftChild -> tables[0];
-		Schema sch1,sch2;
-		CNF cnf;
-		RelationalOp* lop;
-
-		auto it = selectMap.find(left);
-		if(it != selectMap.end())		lop = (RelationalOp*) & it->second;
-		else				lop = (RelationalOp*) & scanMap.at(left);
-
-		lop->returnSchema(sch1);
-		RelationalOp* rop = constTree(root -> rightChild, _predicate);
-		rop->returnSchema(sch2);
-
-		cnf.ExtractCNF (*_predicate, sch1, sch2);
-		Schema schout = sch1;
-		schout.Append(sch2);
-		Join* join = new Join(sch1, sch2, schout, cnf, lop , rop);
-		return ((RelationalOp*) join);
-	}
-
-	if (root -> rightChild -> tables.size() == 1)
-	{
-		string right = root -> rightChild -> tables[0];
-		Schema sch1,sch2;
-		CNF cnf;
-		RelationalOp* rop;
-
-		auto it = selectMap.find(right);
-		if(it != selectMap.end())		rop = (RelationalOp*) & it->second;
-		else				rop = (RelationalOp*) & scanMap.at(right);
-
-		rop->returnSchema(sch2);
-		RelationalOp* lop = constTree(root -> leftChild, _predicate);
-		lop->returnSchema(sch1);
-
-		cnf.ExtractCNF (*_predicate, sch1, sch2);
-		Schema schout = sch1;
-		schout.Append(sch2);
-		Join* join = new Join(sch1, sch2, schout, cnf, lop , rop);
-		return ((RelationalOp*) join);
-	}
-
-	Schema sch1,sch2;
-	CNF cnf;
-	RelationalOp* lop = constTree(root -> leftChild, _predicate);
-	RelationalOp* rop = constTree(root -> rightChild, _predicate);
-
-	lop->returnSchema(sch1);
-	rop->returnSchema(sch2);
-
-	cnf.ExtractCNF (*_predicate, sch1, sch2);
-	Schema schout = sch1;
-	schout.Append(sch2);
-	Join* join = new Join(sch1, sch2, schout, cnf, lop , rop);
-	return ((RelationalOp*) join);
-
 }

@@ -1,4 +1,4 @@
-#ifndef _FUNCTION_H
+spp#ifndef _FUNCTION_H
 #define _FUNCTION_H
 
 #include <iostream>
