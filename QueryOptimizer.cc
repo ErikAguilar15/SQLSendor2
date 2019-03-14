@@ -39,8 +39,8 @@ if(stringTableList.size() == 0){
 
 	OptimizationTree* treeNode = new OptimizationTree;
 	treeNode->tables.push_back(stringTableList[0]);
-	treeNode.leftChild = NULL;
-	treeNode.rightChild = NULL;
+	treeNode->leftChild = NULL;
+	treeNode->rightChild = NULL;
 	*_root = *treeNode;
 
 } else if(stringTableList.size() == 2){			//Building 2 tables
@@ -107,7 +107,7 @@ if(stringTableList.size() == 0){
 	int next = 2;
 	vector<OptimizationTree*> optimizeContinued;
 
-	while(nextNode < stringTableList.size()){
+	while(next < stringTableList.size()){
 
 		treeNode = continueOptimizing(treeNode, stringTableList, next);
 		if(next == stringTableList.size() - 1){
