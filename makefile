@@ -1,5 +1,5 @@
 CC = g++ -g -O0 -Wno-deprecated
-
+lfl = -lsqlite3
 tag = -i
 
 ifdef linux
@@ -8,7 +8,7 @@ endif
 
 
 main.out:	QueryParser.o QueryLexer.o Schema.o Record.o File.o DBFile.o Comparison.o Function.o RelOp.o Catalog.o QueryOptimizer.o QueryCompiler.o main.o
-	$(CC) -o main.out main.o QueryParser.o QueryLexer.o Schema.o Record.o File.o DBFile.o Comparison.o Function.o RelOp.o Catalog.o QueryOptimizer.o QueryCompiler.o -lfl
+	$(CC) -o main.out main.o QueryParser.o QueryLexer.o Schema.o Record.o File.o DBFile.o Comparison.o Function.o RelOp.o Catalog.o QueryOptimizer.o QueryCompiler.o $(lfl)
 
 main.o:	main.cc
 	$(CC) -c main.cc
