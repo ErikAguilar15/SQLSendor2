@@ -28,7 +28,7 @@ public:
 
 	// every operator has to implement this method
 	virtual bool GetNext(Record& _record) = 0;
-	virtual void returnSchema(Schema& _schema) = 0;
+	virtual Schema GetSchema() = 0;
 
 	/* Virtual function for polymorphic printing using operator<<.
 	 * Each operator has to implement its specific version of print.
@@ -85,7 +85,9 @@ public:
 
 	virtual bool GetNext(Record& _record);
 
-	virtual void returnSchema (Schema& _schema){_schema = schema;}
+	virtual Schema GetSchema (){
+		return schema;
+	}
 
 	virtual ostream& print(ostream& _os);
 };
@@ -115,7 +117,9 @@ public:
 
 	virtual bool GetNext(Record& _record);
 
-	virtual void returnSchema (Schema& _schema){_schema = schemaOut;}
+	virtual Schema GetSchema (){
+		return schemaOut;
+	}
 
 	virtual ostream& print(ostream& _os);
 };
@@ -152,7 +156,9 @@ public:
 
 	virtual bool GetNext(Record& _record);
 
-	virtual void returnSchema (Schema& _schema){_schema = schemaOut;}
+	virtual Schema GetSchema (){
+		return schemaOut;
+	}
 
 	virtual ostream& print(ostream& _os);
 };
@@ -173,7 +179,9 @@ public:
 
 	virtual bool GetNext(Record& _record);
 
-	virtual void returnSchema (Schema& _schema){_schema = schema;}
+	virtual Schema GetSchema (){
+		return schema;
+	}
 
 	virtual ostream& print(ostream& _os);
 };
@@ -198,7 +206,9 @@ public:
 
 	virtual bool GetNext(Record& _record);
 
-	virtual void returnSchema (Schema& _schema){_schema = schemaOut;}
+	virtual Schema GetSchema (){
+		return schemaOut;
+	}
 
 	virtual ostream& print(ostream& _os);
 };
@@ -229,7 +239,9 @@ public:
 
 	virtual bool GetNext(Record& _record);
 
-	virtual void returnSchema (Schema& _schema){_schema = schemaOut;}
+	virtual Schema GetSchema (){
+		return schemaOut;
+	}
 
 	virtual ostream& print(ostream& _os);
 };
@@ -253,7 +265,9 @@ public:
 
 	virtual bool GetNext(Record& _record);
 
-	virtual void returnSchema (Schema& _schema){_schema = schema;}
+	virtual Schema GetSchema (){
+		return schema;
+	}
 
 	virtual ostream& print(ostream& _os);
 };
