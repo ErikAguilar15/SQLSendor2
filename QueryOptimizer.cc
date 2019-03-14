@@ -19,37 +19,146 @@ QueryOptimizer::~QueryOptimizer() {
 void QueryOptimizer::Optimize(TableList* _tables, AndList* _predicate,
 	OptimizationTree* _root) {
 	// compute the optimal join order
-
-	TableList * tables = _tables;
-	vector <string> tablez;		// Values after mapping original tables names
-	vector <string> Origtablez;	// Original mapped table names
-	vector <string> tablezNames;	// Original table names
-	int indx = 0;							//Index value
+	vector<string> stringTableList;
+	TableList* tables = _tables;
+	int count = 0;							//creating a counter
 
 	while (tables != NULL){
 
-		unsigned int tups;
-
-		string s1(tables->tableName);		// Getting table information and schema
-		catalog->GetNoTuples(s1, tups);
-		Schema temp;
-		catalog -> GetSchema(s1, temp);
-		string s = to_string(indx);
-
-		Map[s].size = tups;
-		Map[s].cost = 0;
-		Map[s].order = s;
-		Map[s].sch = temp;
-
-		tablez.push_back(s);			// Push values back into vectors
-		Origtablez.push_back(s);
-		tablezNames.push_back(s1);
-		mapping[s] = s1;
-		indx++;										// Update index
-		tables = tables->next;		// Move to next table
+		stringTableList.push_back(string(tables->tableName));
+		tables = tables->next;
+		count++;
 
 	}
 
+if(stringTableList.size() == 0){
+
+	_root = NULL;
+
+} else if(stringTableList.size() == 1){				//Building 1 table
+
+	OptimizationTree* treeNode = new OptimizationTree;
+	treeNode->tables.push_back(stringTableList[0]);
+	treeNode.leftChild = NULL;
+	treeNode.rightChild = NULL;
+	*_root = *treeNode;
+
+} else if(stringTableList.size() == 2){			//Building 2 tables
+
+	int i = 0;
+
+	OptimizationTree* treeNode = new OptimizationTree;
+	OptimizationTree* treeNodeLeft = new OptimizationTree;
+	OptimizationTree* treeNodeRight = new OptimizationTree;
+
+	for(i = 0; i < 2; i++){
+
+		treeNode->tables.push_back(stringTableList[i]);
+
+	}
+
+	treeNodeLeft->tables.push_back(stringTableList[0]);
+	treeNodeRight->tables.push_back(stringTableList[1]);
+
+	treeNode->leftChild = treeNodeLeft;
+	treeNodeLeft->leftChild = NULL;
+	treeNodeRight->leftChild = NULL;
+
+	treeNode->rightChild = treeNodeRight;
+	treeNodeLeft->rightChild = NULL;
+	treeNodeRight->rightChild = NULL;
+
+	treeNode->parent = NULL;
+	treeNodeLeft->parent = treeNode;
+	treeNodeRight->parent = treeNode;
+
+	*_root = *treeNode;
+
+} else {					//If we are building more than 2 tables
+
+	int i = 0;
+
+	OptimizationTree* treeNode = new OptimizationTree;
+	OptimizationTree* treeNodeLeft = new OptimizationTree;
+	OptimizationTree* treeNodeRight = new OptimizationTree;
+
+	for(i = 0; i < 2; i++){
+
+		treeNode->tables.push_back(stringTableList[i]);
+
+	}
+
+	treeNodeLeft->tables.push_back(stringTableList[0]);
+	treeNodeRight->tables.push_back(stringTableList[1]);
+
+	treeNode->leftChild = treeNodeLeft;
+	treeNodeLeft->leftChild = NULL;
+	treeNodeRight->leftChild = NULL;
+
+	treeNode->rightChild = treeNodeRight;
+	treeNodeLeft->rightChild = NULL;
+	treeNodeRight->rightChild = NULL;
+
+	treeNode->parent = NULL;
+	treeNodeLeft->parent = treeNode;
+	treeNodeRight->parent = treeNode;
+
+	OptimizationTree* nextNode = new OptimizationTree;			//to handle the extra tables
+	int next = 2;
+	vector<OptimizationTree*> optimizeContinued;
+
+	while(nextNode < stringTableList.size()){
+
+		treeNode = continueOptimizing(treeNode, stringTableList, next);
+		if(next == stringTableList.size() - 1){
+
+			optimizeContinued.push_back(treeNode);
+
+		}
+		next++;
+	}
+	*_root = *treeNode;
+}
+
+}
+
+//Used to continue pairing until we have no more tables
+OptimizationTree* QueryOptimizer::continueOptimizing(OptimizationTree* _root, vector<string> tableList, int iterator){
+
+	int i = 0;
+
+	OptimizationTree* treeNode = new OptimizationTree;
+	OptimizationTree* treeNodeLeft = new OptimizationTree;
+	OptimizationTree* treeNodeRight = new OptimizationTree;
+
+	int index = iterator;
+	vector<string> tableListDuplicate = tableList;
+	OptimizationTree* holdRoot = _root;
+
+	treeNodeLeft = holdRoot;
+	treeNodeLeft->parent = treeNode;
+
+	treeNodeRight->tables.push_back(tableListDuplicate[iterator]);
+	treeNodeRight->parent = treeNode;
+	treeNodeRight->leftChild = NULL;
+	treeNodeRight->rightChild = NULL;
+
+	for(i = 0; i < iterator; i++){
+
+		treeNode->tables.push_back(tableListDuplicate[i]);
+
+	}
+
+	treeNode->parent = NULL;
+	treeNode->leftChild = treeNodeLeft;
+	treeNode->rightChild = treeNodeRight;
+
+	return treeNode;
+
+}
+
+
+/*
 	CNF cnf;
 	tables = _tables;
 
@@ -210,165 +319,4 @@ void QueryOptimizer::Optimize(TableList* _tables, AndList* _predicate,
 	treeGenerator(tabList, _root);
 }
 
-void QueryOptimizer::treeDisp(OptimizationTree* & _root)
-{
-	if (_root -> leftChild == NULL && _root -> rightChild == NULL)
-	{
-		cout<<_root -> tables[0]<<endl;
-		cout<<_root -> noTuples<<endl;
-		cout<<endl;
-		return;
-	}
-	treeDisp(_root -> leftChild);
-	treeDisp(_root -> rightChild);
-}
-
-void QueryOptimizer::treeGenerator(string tabList, OptimizationTree* & _root)
-{
-	string left,right;
-	int pos = tabList.find(",");
-
-	if (pos != string::npos)
-	{
-		left = tabList.substr(0,pos);
-		right = tabList.substr(tabList.find(",")+1);
-
-		_root -> leftChild = new OptimizationTree;
-		treeGenerator(left, _root -> leftChild);
-		_root -> rightChild = new OptimizationTree;
-		treeGenerator(right, _root -> rightChild);
-		return;
-	}
-
-	if (tabList.size() == 1)
-	{
-		_root -> noTuples = Map[tabList].size;
-		_root -> leftChild = NULL;
-		_root -> rightChild = NULL;
-		return;
-	}
-
-	_root -> leftChild = new OptimizationTree;
-	_root -> leftChild -> leftChild = NULL;
-	_root -> leftChild -> rightChild = NULL;
-	_root -> leftChild -> tables.push_back(_root -> tables[0]);
-	_root -> leftChild -> noTuples = Map[tabList].size;
-
-	_root -> rightChild = new OptimizationTree;
-	_root -> rightChild -> leftChild = NULL;
-	_root -> rightChild -> rightChild = NULL;
-	_root -> rightChild -> tables.push_back(_root -> tables[1]);
-	_root -> rightChild -> noTuples = Map[tabList].size;
-
-}
-
-void QueryOptimizer::Partition(string tables, AndList* _predicate)
-{
-	string copy = tables;
-	unsigned long long min_cost = LLONG_MAX,cost,size;
-	string order;
-	Schema sch1,sch2, temp;
-
-	sort(copy.begin(), copy.end());
-
-	auto it = Map.find(copy);
-	if(it != Map.end()) return;
-
-	int N = tables.size();
-	bool lastPerm = true;
-
-	while (lastPerm)
-	{
-		for (int j = 0; j <= N - 2; j++)
-		{
-			string left="";
-
-			for (int ind = 0; ind <= j; ind++) left+= tables[ind];
-			Partition(left, _predicate);
-
-			string right="";
-
-			for (int ind = j+1; ind < N; ind++) right+= tables[ind];
-			Partition(right, _predicate);
-
-			sort(left.begin(), left.end());
-			sort(right.begin(), right.end());
-
-			cost = Map[left].cost + Map[right].cost;
-
-			if (j!=0) cost += Map[left].size;
-			if (j!=N-2) cost += Map[right].size;
-
-			if (cost < min_cost){
-
-				sch1 = Map[left].sch;
-				sch2 = Map[right].sch;
-				unsigned long long Va,Vb, div;
-				CNF cnf;
-
-				cnf.ExtractCNF (*_predicate, sch1, sch2);
-
-				vector <Attribute> atts1 = sch1.GetAtts();
-				vector <Attribute> atts2 = sch2.GetAtts();
-
-				if (cnf.numAnds >0)
-				{
-					for (int i = 0 ; i < cnf.numAnds; i++)
-					{
-						if (cnf.andList[i].operand1 == Left)
-						{
-							Va = atts1[cnf.andList[i].whichAtt1].noDistinct;
-							Vb = atts2[cnf.andList[i].whichAtt2].noDistinct;
-						}
-
-						if (cnf.andList[i].operand1 == Right)
-						{
-							Va = atts1[cnf.andList[i].whichAtt2].noDistinct;
-							Vb = atts2[cnf.andList[i].whichAtt1].noDistinct;
-						}
-
-						if (Va > Vb) div = Va; else div = Vb;	// Max [Va,Vb]
-					}
-				}
-
-				if (cnf.numAnds == 0)	div = 1;
-
-				size = Map[left].size*Map[right].size/div;
-				//order = "(" + Map[left].order + "," + Map[right].order + ")";
-				order = Map[left].order + "," + Map[right].order;
-				min_cost = cost;
-
-				temp = sch1;
-				temp.Append(sch2);
-			}
-		}
-
-		lastPerm = permutation(tables);
-	}
-
-	Map[copy].order = order;
-	Map[copy].size = size;
-	Map[copy].cost = min_cost;
-	Map[copy].sch = temp;
-
-}
-
-bool QueryOptimizer::permutation(string& array)
-{
-	int k = -1, l = 0;
-	for (int i = 0; i < array.size()-1; i++)
-		if(array[i]<array[i+1]) k = i;
-
-	if (k == -1) return false;
-
-	for (int i = k+1; i < array.size(); i++)
-		if(array[k]<array[i]) l = i;
-
-	swap(array[k],array[l]);
-
-	int count = 1, temp = k+1;
-	for (int i=0; i<(array.size()-k-1)/2; i++,count++,temp++)
-		swap(array[temp],array[array.size()-count]);
-
-	return true;
-}
+*/
