@@ -48,13 +48,19 @@ private:
 	// physical file where data to be scanned are stored
 	DBFile file;
 
+	string tableName;
+
 public:
 	Scan(Schema& _schema, DBFile& _file);
 	virtual ~Scan();
 
 	virtual bool GetNext(Record& _record);
 
-	virtual void returnSchema (Schema& _schema){_schema = schema;}
+	virtual void ContinueScan(string tablename);
+
+	virtual Schema GetSchema(){
+		return schema;
+	}
 
 	virtual ostream& print(ostream& _os);
 };
@@ -239,7 +245,7 @@ private:
 	// operator generating data
 	RelationalOp* producer;
 
-	ofstream file;
+	ofstream outFileStream;
 
 public:
 	WriteOut(Schema& _schema, string& _outFile, RelationalOp* _producer);
