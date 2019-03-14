@@ -31,25 +31,13 @@ class QueryOptimizer {
 private:
 	Catalog* catalog;
 
-	struct plan{
-		unsigned long long size;
-		unsigned long long cost;
-		string order;
-		Schema sch;
-	};
-
-	map <string, plan> Map;
-	map <string, string> mapping;
-
 public:
 	QueryOptimizer(Catalog& _catalog);
 	virtual ~QueryOptimizer();
 
 	void Optimize(TableList* _tables, AndList* _predicate, OptimizationTree* _root);
-	bool permutation(string& out);
-	void Partition(string tables, AndList* _predicate);
-	void treeGenerator(string tabList, OptimizationTree* & _root);
-	void treeDisp(OptimizationTree* & _root);
+	OptimizationTree* continueOptimizing(OptimizationTree* _root, vector<string> tableList, int iterator);
+
 };
 
 #endif // _QUERY_OPTIMIZER_H
