@@ -76,11 +76,13 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 	// push-down selections: create a SELECT operator wherever necessary
 
 	// call the optimizer to compute the join order
-	OptimizationTree* root;
+	cout << "Optimizer" << endl;
+	OptimizationTree* root = new OptimizationTree;
 	optimizer->Optimize(_tables, _predicate, root);
 	OptimizationTree* rootCopy = root;
 
 	// create join operators based on the optimal order computed by the optimizer
+	cout << "Creating Join Operators" << endl;
 	RelationalOp* queryTree = createTree(rootCopy, pushDown, _predicate, 0);
 	RelationalOp* treeRoot = queryTree;
 	Schema schemaIn = queryTree->GetSchema();
@@ -225,6 +227,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 		}
 
 		Function compute;
+		cout << "Make function compute" << endl;
 
 		if(_finalFunction != NULL){
 
