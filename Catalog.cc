@@ -214,7 +214,7 @@ bool Catalog::Save() {
 	rc = sqlite3_exec(db, "END TRANSACTION", 0, 0, &zErrMsg);
 	tables.MoveToStart();
 	close_database();
-	cout << "-----------------Done Saving-----------------------------------------------------------------------------";
+	cout << "-----------------Done Saving-----------------------------------------------------------------------------" << endl;
 }
 
 bool Catalog::GetNoTuples(string& _table, unsigned int& _noTuples) {
