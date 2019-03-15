@@ -4,6 +4,8 @@
 #include <fstream>
 
 #include "Catalog.h"
+#include "DataTypeClass.h"
+#include "DataTypeClass.cc"
 #include "EfficientMap.h"
 #include "EfficientMap.cc"
 

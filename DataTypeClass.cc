@@ -50,7 +50,7 @@ void TableInfo::CopyFrom(TableInfo & withMe)
 	t_name = withMe.get_name();
 	t_data_path = withMe.get_name();
 	t_number_of_tuples = withMe.get_number_of_tuples();
-	list_of_attributes.Clear();
+	//list_of_attributes.Clear();
 	list_of_attributes = withMe.get_Schema();
 }
 

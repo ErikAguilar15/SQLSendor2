@@ -1,7 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include "RelOp.h"
-#include "Catalog.cc"
+//#include "Catalog.cc"
 
 using namespace std;
 
@@ -195,6 +195,11 @@ Join::~Join() {
 
 }
 
+bool Join::GetNext(Record& _record){
+
+
+}
+
 ostream& Join::print(ostream& _os) {
 	int i = 0;
 
@@ -292,6 +297,11 @@ DuplicateRemoval::~DuplicateRemoval() {
 
 }
 
+bool DuplicateRemoval::GetNext(Record& _record){
+
+
+}
+
 ostream& DuplicateRemoval::print(ostream& _os) {
 
 	_os << "DISTINCT ";
@@ -321,6 +331,11 @@ Sum::~Sum() {
 
 }
 
+bool Sum::GetNext(Record& _record){
+
+
+}
+
 ostream& Sum::print(ostream& _os) {
 	int i = 0;
 
@@ -344,6 +359,11 @@ GroupBy::GroupBy(Schema& _schemaIn, Schema& _schemaOut, OrderMaker& _groupingAtt
 }
 
 GroupBy::~GroupBy() {
+
+}
+
+bool GroupBy::GetNext(Record& _record){
+
 
 }
 
@@ -379,6 +399,11 @@ WriteOut::~WriteOut() {
 	if(outFileStream.is_open()){
 		outFileStream.close();
 	}
+
+}
+
+bool WriteOut::GetNext(Record& _record){
+
 
 }
 
