@@ -199,6 +199,12 @@ ostream& Project::print(ostream& _os) {
 Join::Join(Schema& _schemaLeft, Schema& _schemaRight, Schema& _schemaOut,
 	CNF& _predicate, RelationalOp* _left, RelationalOp* _right) {
 
+		schemaLeft = _schemaLeft;
+		schemaRight = _schemaRight;
+		schemaOut = _schemaOut;
+		predicate = _predicate;
+		left = _left;
+		right = _right;
 		cout << "Running Join" << endl;
 
 }
