@@ -256,7 +256,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 
 		int* holder = new int[groupAtts.size()];
 		copy(groupAtts.begin(), groupAtts.end(), holder);
-		OrderMaker groupingAtts(schemaIn, holder, counter);
+		OrderMaker groupingAtts(schemaIn, holder, counter); //fix this line
 		GroupBy* group = new GroupBy(schemaIn, schemaOut, groupingAtts, compute, queryTree);
 		treeRoot = (RelationalOp*) group;
 

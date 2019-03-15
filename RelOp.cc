@@ -289,6 +289,8 @@ ostream& Join::print(ostream& _os) {
 
 DuplicateRemoval::DuplicateRemoval(Schema& _schema, RelationalOp* _producer) {
 
+	schema = _schema;
+	producer = _producer;
 	cout << "Running Duplicate Removal" << endl;
 
 }
@@ -323,6 +325,10 @@ ostream& DuplicateRemoval::print(ostream& _os) {
 Sum::Sum(Schema& _schemaIn, Schema& _schemaOut, Function& _compute,
 	RelationalOp* _producer) {
 
+		schemaIn = _schemaIn;
+		schemaOut = _schemaOut;
+		compute = _compute;
+		producer = _producer;
 		cout << "Running Sum" << endl;
 
 }
@@ -354,6 +360,11 @@ ostream& Sum::print(ostream& _os) {
 GroupBy::GroupBy(Schema& _schemaIn, Schema& _schemaOut, OrderMaker& _groupingAtts,
 	Function& _compute,	RelationalOp* _producer) {
 
+		schemaIn = _schemaIn;
+		schemaOut = _schemaOut;
+		groupingAtts = _groupingAtts;
+		compute = _compute;
+		producer = _producer;
 		cout << "Running Group By" << endl;
 
 }
@@ -389,6 +400,9 @@ ostream& GroupBy::print(ostream& _os) {
 
 WriteOut::WriteOut(Schema& _schema, string& _outFile, RelationalOp* _producer) {
 
+	schema = _schema;
+	outFile = _outFile;
+	producer = _producer;
 	outFileStream.open(_outFile);
 	cout << "Running WriteOut" << endl;
 
@@ -432,6 +446,7 @@ ostream& WriteOut::print(ostream& _os) {
 ostream& operator<<(ostream& _os, QueryExecutionTree& _op) {
 
 	_os << "QUERY EXECUTION TREE: " << endl;
+	_os << endl;
 	_os << *_op.root << endl;
 	return _os;
 
