@@ -13,6 +13,8 @@ ostream& operator<<(ostream& _os, RelationalOp& _op) {
 
 Scan::Scan(Schema& _schema, DBFile& _file) {
 
+	schema = _schema;
+	file = _file;
 	cout << "Running Scan" << endl;
 }
 
@@ -42,6 +44,10 @@ ostream& Scan::print(ostream& _os) {
 Select::Select(Schema& _schema, CNF& _predicate, Record& _constants,
 	RelationalOp* _producer) {
 
+		schema = _schema;
+		predicate = _predicate;
+		constants = _constants;
+		producer = _producer;
 		cout << "Running Select" << endl;
 }
 
@@ -156,6 +162,12 @@ ostream& Select::print(ostream& _os) {
 Project::Project(Schema& _schemaIn, Schema& _schemaOut, int _numAttsInput,
 	int _numAttsOutput, int* _keepMe, RelationalOp* _producer) {
 
+		schemaIn = _schemaIn;
+		schemaOut = _schemaOut;
+		numAttsInput = _numAttsInput;
+		numAttsOutput = _numAttsOutput;
+		keepMe = _keepMe;
+		producer = _producer;
 		cout << "Running Project" << endl;
 
 }
