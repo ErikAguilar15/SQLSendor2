@@ -19,32 +19,27 @@ QueryOptimizer::~QueryOptimizer() {
 void QueryOptimizer::Optimize(TableList* _tables, AndList* _predicate,
 	OptimizationTree* _root) {
 	// compute the optimal join order
-	vector<string> stringTableList;
+	vector<string> stringTableList;		//Vector of tables
 	TableList* tables = _tables;
 	int count = 0;							//creating a counter
 
 	while (tables != NULL){
-
-		stringTableList.push_back(string(tables->tableName));
+		stringTableList.push_back(string(tables->tableName));		//Push tables into vector
 		tables = tables->next;
 		count++;
-
 	}
 
-if(stringTableList.size() == 0){
-
+if(stringTableList.size() == 0){		//Check if vector is empty
 	_root = NULL;
-
-} else if(stringTableList.size() == 1){				//Building 1 table
-
+}
+else if(stringTableList.size() == 1){				//Building 1 table
 	OptimizationTree* treeNode = new OptimizationTree;
 	treeNode->tables.push_back(stringTableList[0]);
 	treeNode->leftChild = NULL;
 	treeNode->rightChild = NULL;
 	*_root = *treeNode;
-
-} else if(stringTableList.size() == 2){			//Building 2 tables
-
+}
+else if(stringTableList.size() == 2){			//Building 2 tables
 	int i = 0;
 
 	OptimizationTree* treeNode = new OptimizationTree;
@@ -52,9 +47,7 @@ if(stringTableList.size() == 0){
 	OptimizationTree* treeNodeRight = new OptimizationTree;
 
 	for(i = 0; i < 2; i++){
-
 		treeNode->tables.push_back(stringTableList[i]);
-
 	}
 
 	treeNodeLeft->tables.push_back(stringTableList[0]);
@@ -74,8 +67,8 @@ if(stringTableList.size() == 0){
 
 	*_root = *treeNode;
 
-} else {					//If we are building more than 2 tables
-
+}
+else {					//If we are building more than 2 tables
 	int i = 0;
 
 	OptimizationTree* treeNode = new OptimizationTree;
@@ -83,9 +76,7 @@ if(stringTableList.size() == 0){
 	OptimizationTree* treeNodeRight = new OptimizationTree;
 
 	for(i = 0; i < 2; i++){
-
 		treeNode->tables.push_back(stringTableList[i]);
-
 	}
 
 	treeNodeLeft->tables.push_back(stringTableList[0]);
@@ -104,16 +95,14 @@ if(stringTableList.size() == 0){
 	treeNodeRight->parent = treeNode;
 
 	OptimizationTree* nextNode = new OptimizationTree;			//to handle the extra tables
-	int next = 2;
 	vector<OptimizationTree*> optimizeContinued;
+	int next = 2;
 
 	while(next < stringTableList.size()){
-
 		treeNode = continueOptimizing(treeNode, stringTableList, next);
+
 		if(next == stringTableList.size() - 1){
-
 			optimizeContinued.push_back(treeNode);
-
 		}
 		next++;
 	}
@@ -124,15 +113,14 @@ if(stringTableList.size() == 0){
 
 //Used to continue pairing until we have no more tables
 OptimizationTree* QueryOptimizer::continueOptimizing(OptimizationTree* _root, vector<string> tableList, int iterator){
-
 	int i = 0;
 
 	OptimizationTree* treeNode = new OptimizationTree;
 	OptimizationTree* treeNodeLeft = new OptimizationTree;
 	OptimizationTree* treeNodeRight = new OptimizationTree;
+	vector<string> tableListDuplicate = tableList;
 
 	int index = iterator;
-	vector<string> tableListDuplicate = tableList;
 	OptimizationTree* holdRoot = _root;
 
 	treeNodeLeft = holdRoot;
@@ -144,9 +132,7 @@ OptimizationTree* QueryOptimizer::continueOptimizing(OptimizationTree* _root, ve
 	treeNodeRight->rightChild = NULL;
 
 	for(i = 0; i < iterator; i++){
-
 		treeNode->tables.push_back(tableListDuplicate[i]);
-
 	}
 
 	treeNode->parent = NULL;
@@ -154,5 +140,4 @@ OptimizationTree* QueryOptimizer::continueOptimizing(OptimizationTree* _root, ve
 	treeNode->rightChild = treeNodeRight;
 
 	return treeNode;
-
 }

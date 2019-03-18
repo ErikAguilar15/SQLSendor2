@@ -34,7 +34,7 @@ void Scan::ContinueScan(string tablename){
 }
 
 ostream& Scan::print(ostream& _os) {
-	 _os << "SCAN" << "Table: [" << tableName << "] ";
+	 _os << "SCAN " << "Table: [" << tableName << "]";
 	 _os << endl;
 	 return _os;
 
