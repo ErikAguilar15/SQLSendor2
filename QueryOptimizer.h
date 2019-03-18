@@ -37,7 +37,6 @@ public:
 
 	void Optimize(TableList* _tables, AndList* _predicate, OptimizationTree* _root);
 	OptimizationTree* continueOptimizing(OptimizationTree* _root, vector<string> tableList, int iterator);
-
 };
 
 #endif // _QUERY_OPTIMIZER_H
