@@ -454,12 +454,12 @@ WriteOut::~WriteOut() {
 
 bool WriteOut::GetNext(Record& _record){
 
-	bool writeout = producer->GetNext(record);
+	bool writeout = producer->GetNext(_record);
 	if (!writeout) {
 		outFileStream.close();
 		return false;
 	}
-	record.print(outFileStream,schema);
+	_record.print(outFileStream,schema);
 	outFileStream<<endl;
 	return writeout;
 
@@ -497,5 +497,5 @@ ostream& operator<<(ostream& _os, QueryExecutionTree& _op) {
 }
 
 void QueryExecutionTree::ExecuteQuery() {
-	
+
 }
