@@ -495,3 +495,7 @@ ostream& operator<<(ostream& _os, QueryExecutionTree& _op) {
 	return _os;
 
 }
+
+void QueryExecutionTree::ExecuteQuery() {
+	
+}
