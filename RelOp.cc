@@ -15,7 +15,7 @@ Scan::Scan(Schema& _schema, DBFile& _file) {
 
 	schema = _schema;
 	file = _file;
-	cout << "Running Scan" << endl;
+	cout << "Run Scan" << endl;
 }
 
 Scan::~Scan() {
@@ -48,7 +48,7 @@ Select::Select(Schema& _schema, CNF& _predicate, Record& _constants,
 		predicate = _predicate;
 		constants = _constants;
 		producer = _producer;
-		cout << "Running Select" << endl;
+		cout << "Run Select" << endl;
 }
 
 Select::~Select() {
@@ -168,7 +168,7 @@ Project::Project(Schema& _schemaIn, Schema& _schemaOut, int _numAttsInput,
 		numAttsOutput = _numAttsOutput;
 		keepMe = _keepMe;
 		producer = _producer;
-		cout << "Running Project" << endl;
+		cout << "Run Project" << endl;
 
 }
 
@@ -205,7 +205,7 @@ Join::Join(Schema& _schemaLeft, Schema& _schemaRight, Schema& _schemaOut,
 		predicate = _predicate;
 		left = _left;
 		right = _right;
-		cout << "Running Join" << endl;
+		cout << "Run Join" << endl;
 
 }
 
@@ -309,7 +309,7 @@ DuplicateRemoval::DuplicateRemoval(Schema& _schema, RelationalOp* _producer) {
 
 	schema = _schema;
 	producer = _producer;
-	cout << "Running Duplicate Removal" << endl;
+	cout << "Run Duplicate Removal" << endl;
 
 }
 
@@ -347,7 +347,7 @@ Sum::Sum(Schema& _schemaIn, Schema& _schemaOut, Function& _compute,
 		schemaOut = _schemaOut;
 		compute = _compute;
 		producer = _producer;
-		cout << "Running Sum" << endl;
+		cout << "Run Sum" << endl;
 
 }
 
@@ -383,7 +383,7 @@ GroupBy::GroupBy(Schema& _schemaIn, Schema& _schemaOut, OrderMaker& _groupingAtt
 		groupingAtts = _groupingAtts;
 		compute = _compute;
 		producer = _producer;
-		cout << "Running Group By" << endl;
+		cout << "Run Group By" << endl;
 
 }
 
@@ -422,7 +422,7 @@ WriteOut::WriteOut(Schema& _schema, string& _outFile, RelationalOp* _producer) {
 	outFile = _outFile;
 	producer = _producer;
 	outFileStream.open(_outFile);
-	cout << "Running WriteOut" << endl;
+	cout << "Run WriteOut" << endl;
 
 }
 
