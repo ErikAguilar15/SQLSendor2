@@ -57,6 +57,18 @@ Select::~Select() {
 
 bool Select::GetNext(Record& _record){
 
+	if (!producer->GetNext(_record)) {
+		return false;
+	}
+	else {
+		while (!predicate.Run(_record, constants)) {
+			if (!producer->GetNext(_record)) {
+				return false;
+			}
+		}
+	}
+
+	return true;
 
 }
 
@@ -177,6 +189,12 @@ Project::~Project() {
 }
 
 bool Project::GetNext(Record& _record){
+
+	if (producer->GetNext(_record)) {
+		_record.Project(keepMe, numAttsOutput, numAttsInput);
+		return true;
+	}
+	return false;
 
 }
 
@@ -436,6 +454,14 @@ WriteOut::~WriteOut() {
 
 bool WriteOut::GetNext(Record& _record){
 
+	bool writeout = producer->GetNext(record);
+	if (!writeout) {
+		outFileStream.close();
+		return false;
+	}
+	record.print(outFileStream,schema);
+	outFileStream<<endl;
+	return writeout;
 
 }
 
