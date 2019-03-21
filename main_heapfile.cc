@@ -28,11 +28,10 @@ int main() {
 		files[i].insert(0,"heapTables/");
 		cout<<files[i]<<endl;
 	}
-  {
+
 		db.Create(&filename[0],(FileType) Heap);
     catalog.GetSchema(heapTables[x],sch);
 		db.Load(sch, &files[x][0]);
     db.Close();
-  }
-  return 0;
+    
 }
