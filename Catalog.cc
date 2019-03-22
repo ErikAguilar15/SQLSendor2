@@ -421,15 +421,17 @@ void Catalog::HeapFile(string& _table, string& heapFileLocation, string& textFil
 	for (int i = 0; i < files.size(); i++){
 		filename = "heapTables/";
     filename += files[i];
-    filename += ".txt";
+    filename += ".heap";
 
 		heapTables.push_back(files[i]);
 		files[i] += ".tbl";
 		files[i].insert(0,"heapTables/");
 		cout<<files[i]<<endl;
 
+		catalog.GetSchema(heapTables[i],sch);
 		db.Create(&filename[0],(FileType) Heap);
-    catalog.GetSchema(heapTables[i],sch);
+		db.Open(&filename[0]);
+		catalog.SetDataFile(files[i], filename);
 		db.Load(sch, &files[i][0]);
   }
 
