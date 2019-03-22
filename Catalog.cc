@@ -26,7 +26,6 @@ void Catalog::open_database(const char*_filename) {
 	}
 	else {
 		cout << _filename << " is opened successfully." << endl;
-		cout << "Enter Your Query Here: " << endl;
 	}
 }
 

@@ -57,7 +57,7 @@ Select::~Select() {
 
 bool Select::GetNext(Record& _record){
 
-	if (!producer->GetNext(_record)) {
+	/*if (!producer->GetNext(_record)) {
 		return false;
 	}
 	else {
@@ -66,9 +66,15 @@ bool Select::GetNext(Record& _record){
 				return false;
 			}
 		}
+	}*/
+
+	while (producer->GetNext(_record)) {
+		if (predicate.Run(_record, constants)) {
+			return true;
+		}
 	}
 
-	return true;
+	return false;
 
 }
 
@@ -454,14 +460,23 @@ WriteOut::~WriteOut() {
 
 bool WriteOut::GetNext(Record& _record){
 
-	bool writeout = producer->GetNext(_record);
+	if (producer->GetNext(_record)) {
+		_record.print(outFileStream,schema);
+		outFileStream<<endl;
+		return true;
+	}
+	else {
+		outFileStream.close();
+		return false;
+	}
+	/*bool writeout = producer->GetNext(_record);
 	if (!writeout) {
 		outFileStream.close();
 		return false;
 	}
 	_record.print(outFileStream,schema);
 	outFileStream<<endl;
-	return writeout;
+	return writeout;*/
 
 }
 
@@ -497,8 +512,9 @@ ostream& operator<<(ostream& _os, QueryExecutionTree& _op) {
 }
 
 void QueryExecutionTree::ExecuteQuery() {
-	Record record;
-	while (root->GetNext(record) == true) {
-
+	cout << "Executing Query" << endl;
+	while (1) {
+		Record record;
+		if (!root->GetNext(record)) break;
 	}
 }
