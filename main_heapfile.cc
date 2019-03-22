@@ -22,12 +22,16 @@ int main() {
 	catalog.GetTables(files);
 
 	for (int i = 0; i < files.size(); i++){
+    filename = "heapTables/";
+    filename += files[i];
+    filename += ".txt";
+
 		heapTables.push_back(files[i]);
 		files[i] += ".tbl";
 		files[i].insert(0,"heapTables/");
 		cout<<files[i]<<endl;
 
-    filename = "heapTables/"
+
 
 		db.Create(&filename[0],(FileType) Heap);
     catalog.GetSchema(heapTables[i],sch);

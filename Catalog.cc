@@ -8,6 +8,8 @@
 #include "DataTypeClass.cc"
 #include "EfficientMap.h"
 #include "EfficientMap.cc"
+#include "DBFile.h"
+
 
 using namespace std;
 
@@ -402,6 +404,36 @@ bool Catalog::DropTable(string& _table) {
 		return true;
 
 
+}
+
+void Catalog::HeapFile(string& _table, string& heapFileLocation, string& textFileLocation){
+
+	string dbFile = "catalog.sqlite";
+	Catalog catalog(dbFile);
+	DBFile db;
+  Schema sch;
+
+	string filename;
+	vector <string> files;
+	vector <string> heapTables;
+	catalog.GetTables(files);
+
+	for (int i = 0; i < files.size(); i++){
+		filename = "heapTables/";
+    filename += files[i];
+    filename += ".txt";
+
+		heapTables.push_back(files[i]);
+		files[i] += ".tbl";
+		files[i].insert(0,"heapTables/");
+		cout<<files[i]<<endl;
+
+		db.Create(&filename[0],(FileType) Heap);
+    catalog.GetSchema(heapTables[i],sch);
+		db.Load(sch, &files[i][0]);
+  }
+
+    db.Close();
 }
 
 ostream& operator<<(ostream& _os, Catalog& _c) {

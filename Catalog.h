@@ -121,6 +121,9 @@ public:
 	 * Tables/attributes are sorted in ascending alphabetical order.
 	 */
 	friend ostream& operator<<(ostream& _os, Catalog& _c);
+
+	void HeapFile(string& _table, string& heapFileLocation, string& textFileLocation);
+	
 };
 
 #endif //_CATALOG_H
