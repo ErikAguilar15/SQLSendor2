@@ -406,7 +406,7 @@ bool Catalog::DropTable(string& _table) {
 
 }
 
-void Catalog::HeapFile(string& _table, string& heapFileLocation, string& textFileLocation){
+void Catalog::HeapFile(){
 
 	string dbFile = "catalog.sqlite";
 	Catalog catalog(dbFile);

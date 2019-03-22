@@ -122,8 +122,8 @@ public:
 	 */
 	friend ostream& operator<<(ostream& _os, Catalog& _c);
 
-	void HeapFile(string& _table, string& heapFileLocation, string& textFileLocation);
-	
+	void HeapFile();
+
 };
 
 #endif //_CATALOG_H
