@@ -16,11 +16,10 @@ int main() {
 	DBFile db;
   Schema sch;
 
-	string filename = "heapTables/supplier";
+	string filename;
 	vector <string> files;
 	vector <string> heapTables;
 	catalog.GetTables(files);
-  int x = 7;
 
 	for (int i = 0; i < files.size(); i++){
 		heapTables.push_back(files[i]);
@@ -28,11 +27,13 @@ int main() {
 		files[i].insert(0,"heapTables/");
 		cout<<files[i]<<endl;
 
+    filename = "heapTables/"
+
 		db.Create(&filename[0],(FileType) Heap);
-    catalog.GetSchema(heapTables[x],sch);
-		db.Load(sch, &files[x][0]);
+    catalog.GetSchema(heapTables[i],sch);
+		db.Load(sch, &files[i][0]);
   }
-  
+
     db.Close();
 
 }

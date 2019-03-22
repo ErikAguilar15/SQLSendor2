@@ -498,7 +498,7 @@ ostream& operator<<(ostream& _os, QueryExecutionTree& _op) {
 
 void QueryExecutionTree::ExecuteQuery() {
 	Record record;
-	while (root->GetNext(record) == 1) {
-		
+	while (root->GetNext(record) == true) {
+
 	}
 }
