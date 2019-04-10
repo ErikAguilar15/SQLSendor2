@@ -24,6 +24,7 @@ Scan::~Scan() {
 
 bool Scan::GetNext(Record& _record){
 
+	return file.GetNext(_record);
 
 }
 
@@ -343,6 +344,16 @@ DuplicateRemoval::~DuplicateRemoval() {
 
 bool DuplicateRemoval::GetNext(Record& _record){
 
+	while (1) {
+		if (! producer->GetNext(_record)) return false;
+		stringstream ss;
+		_record.print(ss, schema);
+		auto it = set.find(ss.str());
+		if(it == set.end()) {
+			set[ss.str()] = _record;
+			return true;
+		}
+	}
 
 }
 
@@ -381,6 +392,30 @@ Sum::~Sum() {
 
 bool Sum::GetNext(Record& _record){
 
+	if (recSent) return false;
+	int intSum = 0;
+	double doubleSum = 0;
+	while(producer->GetNext(_record)) {
+		int intResult = 0;
+		double doubleResult = 0;
+		Type t = compute.Apply(record, intResult, doubleResult);
+		if (t == Integer)	intSum+= intResult;
+		if (t == Float)		doubleSum+= doubleResult;
+	}
+
+	double val = doubleSum + (double)intSum;
+	char* recSpace = new char[PAGE_SIZE];
+  int currentPosInRec = sizeof (int) * (2);
+	((int *) recSpace)[1] = currentPosInRec;
+	*((double *) &(recSpace[currentPosInRec])) = val;
+	currentPosInRec += sizeof (double);
+	((int *) recSpace)[0] = currentPosInRec;
+	Record sumRec;
+	sumRec.CopyBits( recSpace, currentPosInRec );
+	delete [] recSpace;
+	_record = sumRec;
+	recSent = 1;
+	return true;
 
 }
 
@@ -513,8 +548,8 @@ ostream& operator<<(ostream& _os, QueryExecutionTree& _op) {
 
 void QueryExecutionTree::ExecuteQuery() {
 	cout << "Executing Query" << endl;
+	Record record;
 	while (1) {
-		Record record;
 		if (!root->GetNext(record)) break;
 	}
 }
