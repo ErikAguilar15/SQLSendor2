@@ -451,7 +451,71 @@ GroupBy::~GroupBy() {
 }
 
 bool GroupBy::GetNext(Record& _record){
+	int i = 0;
 
+	vector<int> attributeStorage;
+	vector<int> attributeStorage1;
+	for(i = 1; i < schemaOut.GetNumAtts(); i++){
+
+		attributeStorage.push_back(i);
+		copy = schemaOut;
+		copy.project(attributeStorage1);
+		attributeStorage1.push_back(0);
+		sum = schemaOut;
+		sum.project(attributeStorage1);
+
+		if(phase == 0){
+
+			while(producer->GetNext(record)){
+
+				stringstream ss;
+				int intResult = 0;
+				double doubleResult = 0;
+				compute.Apply(record, intResult, doubleResult);
+				double val = doubleResult + (double)intResult
+
+				record.project(&groupingAtts.whichAtts[0], groupingAtts.numAtts, copy.GetNumAtts());
+				record.print(s, copy);
+				auto it = set.find(s.str());
+
+				if(it !- set.end()){
+					set[s.str()] += val;
+
+				} else{
+					set[s.str()] = val;
+						recMap[s.str()] = record;
+					}
+			}
+			phase = 1;
+		}
+
+	}
+	if(phase == 1){
+
+		if(set.empty()){
+			return false;
+		}
+
+		record temp = recMap.begin()->second;
+		string beginStr = set.begin()->first;
+
+		char* recSpace = new char[PAGE_SIZE];
+		int currentPosInRec = sizeof(int) * (2);
+		((int*) recSpace)[1] = currentPosInRec;
+		*((double *) &(recSpace[currentPosInRec])) = set.begin()->second;
+		currentPosInRec += sizeof(double);
+		((int*) recSpace)[0] = currentPosInRec;
+		record sumRec;
+		sumRec.CopyBits(recSpace, currentPosInRec);
+		delete [] recSpace;
+
+		record newRec;
+		newRec.AppendRecord(sumRec, temp, 1, schemaOut.GetNumAtts() - 1);
+		recMap.erase(strr);
+		set.erase(strr);
+		record = newRec;
+		return true;
+	}
 
 }
 
