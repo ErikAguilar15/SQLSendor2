@@ -398,7 +398,7 @@ bool Sum::GetNext(Record& _record){
 	while(producer->GetNext(_record)) {
 		int intResult = 0;
 		double doubleResult = 0;
-		Type t = compute.Apply(record, intResult, doubleResult);
+		Type t = compute.Apply(_record, intResult, doubleResult);
 		if (t == Integer)	intSum+= intResult;
 		if (t == Float)		doubleSum+= doubleResult;
 	}
