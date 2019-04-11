@@ -1,6 +1,8 @@
 #include <iostream>
 #include <sstream>
 #include "RelOp.h"
+#include "EfficientMap.h"
+#include <map>
 //#include "Catalog.cc"
 
 using namespace std;
