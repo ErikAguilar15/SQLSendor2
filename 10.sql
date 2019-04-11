@@ -1,4 +1,5 @@
-SELECT l_extendedprice, l_discount
+SELECT SUM(l_extendedprice * l_discount * (1.0-l_tax)), l_suppkey
 FROM lineitem
-WHERE '1994-01-01'<l_shipdate AND '1994-02-01'>l_shipdate
+WHERE l_discount < 0.07 AND l_quantity < 12.0
+GROUP BY l_suppkey
 

@@ -1,4 +1,4 @@
-SELECT ps_partkey, ps_suppkey, ps_availqty, ps_supplycost
-FROM partsupp
-WHERE ps_partkey=123 AND ps_suppkey>10 AND ps_suppkey<100
+SELECT SUM(l_extendedprice * l_discount * (1.0-l_tax))
+FROM lineitem
+WHERE l_discount < 0.07 AND l_quantity < 12.0
 
