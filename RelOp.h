@@ -9,6 +9,7 @@
 #include "Record.h"
 #include "DBFile.h"
 #include "Function.h"
+#include "EfficientMap.cc"
 #include "Comparison.h"
 
 using namespace std;
@@ -233,6 +234,7 @@ private:
 	int phase;
 	map <string, double> set;
 	map <string, Record> recMap;
+	EfficientMap<KeyString, KeyDouble> groups;
 
 public:
 	GroupBy(Schema& _schemaIn, Schema& _schemaOut, OrderMaker& _groupingAtts,
