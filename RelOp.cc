@@ -24,7 +24,10 @@ Scan::~Scan() {
 
 bool Scan::GetNext(Record& _record){
 
-	return file.GetNext(_record);
+	if(file.GetNext(_record) == 0){
+		return true;
+	} else return false;
+
 
 }
 
@@ -451,72 +454,67 @@ GroupBy::~GroupBy() {
 }
 
 bool GroupBy::GetNext(Record& _record){
+
+	_record.Project(groupingAtts.whichAtts, groupingAtts.numAtts, schemaIn.GetNumAtts());
+
 	int i = 0;
+	int runningIntSum = 0;
+	int runningDoubleSum = 0;
+	int iterator = 0;
+	int vectorIterator = 1;
 
-	vector<int> attributeStorage;
-	vector<int> attributeStorage1;
-	for(i = 1; i < schemaOut.GetNumAtts(); i++){
+	vector<Attribute> attributeStorage;
+	vector<string> attributeNames;
+	Schema copy = schemaOut;
+	attributeStorage = copy.GetAtts();
+	for(i = 1; i < copy.GetNumAtts(); i++){
 
-		attributeStorage.push_back(i);
-		copy = schemaOut;
-		copy.project(attributeStorage1);
-		attributeStorage1.push_back(0);
-		sum = schemaOut;
-		sum.project(attributeStorage1);
+		attributeNames.push_back(attributeStorage[i].name);
+	}
+		while(producer->GetNext(_record)){
 
-		if(phase == 0){
-
-			while(producer->GetNext(record)){
-
-				stringstream ss;
-				int intResult = 0;
-				double doubleResult = 0;
-				compute.Apply(record, intResult, doubleResult);
-				double val = doubleResult + (double)intResult
-
-				record.project(&groupingAtts.whichAtts[0], groupingAtts.numAtts, copy.GetNumAtts());
-				record.print(s, copy);
-				auto it = set.find(s.str());
-
-				if(it !- set.end()){
-					set[s.str()] += val;
-
-				} else{
-					set[s.str()] = val;
-						recMap[s.str()] = record;
-					}
+			KeyString name = attributeStorage[vectorIterator].name;
+			KeyDouble value;
+			int point = ((int*) _record.GetBits())[iterator + 1];
+			if(groups.IsThere(name)){
+				if(attributeStorage[vectorIterator].type == Integer){
+					int *currentInt = (int*) &(_record.GetBits()[point]);
+					runningIntSum += *currentInt;
+					value = groups.Find(name);
+					groups.Remove(name, name, value);
+					value = runningIntSum;
+					groups.Insert(name, value);
+				}
+				else if (attributeStorage[vectorIterator].type == Float){
+					double *currentDouble = (double*) &(_record.GetBits()[point]);
+					runningDoubleSum += *currentDouble;
+					value = groups.Find(name);
+					groups.Remove(name, name, value);
+					value = runningDoubleSum;
+					groups.Insert(name, value);
+				}
+			} else {
+				cout << "name not found" << endl;
+				if(attributeStorage[vectorIterator].type == Integer){
+					int *currentInt = (int*) &(_record.GetBits()[point]);
+					value = *currentInt;
+					groups.Insert(name, value);
+				}
+				else if(attributeStorage[vectorIterator].type == Float){
+					double *currentDouble = (double*) &(_record.GetBits()[point]);
+					value = *currentDouble;
+					groups.Insert(name, value);
+				}
 			}
-			phase = 1;
+			vectorIterator++;
+			return true;
 		}
-
-	}
-	if(phase == 1){
-
-		if(set.empty()){
-			return false;
+		groups.MoveToStart();
+		for(int i = 0; i < groups.Length(); i++){
+			cout << groups.CurrentData() << endl;
+			groups.Advance();
 		}
-
-		record temp = recMap.begin()->second;
-		string beginStr = set.begin()->first;
-
-		char* recSpace = new char[PAGE_SIZE];
-		int currentPosInRec = sizeof(int) * (2);
-		((int*) recSpace)[1] = currentPosInRec;
-		*((double *) &(recSpace[currentPosInRec])) = set.begin()->second;
-		currentPosInRec += sizeof(double);
-		((int*) recSpace)[0] = currentPosInRec;
-		record sumRec;
-		sumRec.CopyBits(recSpace, currentPosInRec);
-		delete [] recSpace;
-
-		record newRec;
-		newRec.AppendRecord(sumRec, temp, 1, schemaOut.GetNumAtts() - 1);
-		recMap.erase(strr);
-		set.erase(strr);
-		record = newRec;
-		return true;
-	}
-
+		return false;
 }
 
 
