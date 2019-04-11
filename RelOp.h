@@ -173,6 +173,7 @@ private:
 	RelationalOp* producer;
 
 	map <string, double> set;
+	EfficientMap<KeyString, KeyString> map;
 
 public:
 	DuplicateRemoval(Schema& _schema, RelationalOp* _producer);

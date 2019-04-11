@@ -349,17 +349,30 @@ DuplicateRemoval::~DuplicateRemoval() {
 
 bool DuplicateRemoval::GetNext(Record& _record){
 
-	while (1) {
-		if (! producer->GetNext(_record)) return false;
-		stringstream ss;
-		_record.print(ss, schema);
-		auto it = set.find(ss.str());
-		if(it == set.end()) {
-			set[ss.str()] = _record;
-			return true;
-		}
+	KeyString key;
+	stringstream data;
+	vector<Attribute> attribs = schema.GetAtts();
+	while(producer->GetNext(_record)){
+		for(int i = 0; i < schema.GetNumAtts(); i++){
+			int point = ((int*)_record.GetBits())[i + 1];
+			if(attribs[i].type == Integer){
+				data << attribs[i].name << " " << *(int*) &(_record.GetBits()[point]);
+			} else if(attribs[i].type == Float){
+				data << attribs[i].name << " " << *(double*) &(_record.GetBits()[point]);
+		} else if(attribs[i].type == String){
+			string dataString = (char*) &(_record.GetBits()[point]);
+			data << attribs[i].name << " " << dataString;
 	}
+	data << " ";
+	key = data.str();
 
+} if(!map.IsThere(key)){
+	map.Insert(key, key);
+	return true;
+}
+
+}
+return false;
 }
 
 ostream& DuplicateRemoval::print(ostream& _os) {
@@ -403,7 +416,7 @@ bool Sum::GetNext(Record& _record){
 	while(producer->GetNext(_record)) {
 		int intResult = 0;
 		double doubleResult = 0;
-		Type t = compute.Apply(record, intResult, doubleResult);
+		Type t = compute.Apply(_record, intResult, doubleResult);
 		if (t == Integer)	intSum+= intResult;
 		if (t == Float)		doubleSum+= doubleResult;
 	}
