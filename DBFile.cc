@@ -50,7 +50,7 @@ void DBFile::Load (Schema& schema, char* textFile) {
 
 	FILE * pFile;
 	string str = textFile;
-	pFile = fopen(&str[0],"r");
+	pFile = fopen(&str[0],"rb");
 
 	while (1) {
 		Record record;
