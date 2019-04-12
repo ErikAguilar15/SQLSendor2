@@ -58,7 +58,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 
 				Select* select = new Select(selectSchema, cnf, record, (RelationalOp*)scan);
 				pushDownMap[tabName] = (RelationalOp*)select;
-				cout << "SELECT: " << tabName << " " << endl;
+				//cout << "SELECT: " << tabName << " " << endl;
 
 			}
 
@@ -71,13 +71,13 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 	// push-down selections: create a SELECT operator wherever necessary
 
 	// call the optimizer to compute the join order
-	cout << "CALLING OPTIMIZER" << endl;
+	//cout << "CALLING OPTIMIZER" << endl;
 	OptimizationTree* root = new OptimizationTree;
 	optimizer->Optimize(_tables, _predicate, root);
 	OptimizationTree* rootCopy = root;
 
 	// create join operators based on the optimal order computed by the optimizer
-	cout << "CREATING JOINS" << endl;
+	//cout << "CREATING JOINS" << endl;
 	RelationalOp* queryTree = createTree(rootCopy, pushDownMap, _predicate, 0);
 	RelationalOp* treeRoot = queryTree;
 	Schema schemaIn = queryTree->GetSchema();
@@ -88,7 +88,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 
 		if(_finalFunction == NULL){
 
-			cout << "CALLING FINAL FUNCTION" << endl;
+			//cout << "CALLING FINAL FUNCTION" << endl;
 			Schema schemaOut = schemaIn;
 			int counter = schemaIn.GetNumAtts();
 			int count = 0;
@@ -107,7 +107,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 
 					if(atts[i].name == _attsToSelect->name){
 
-						cout << "PUSHED ATTRIBUTE: "  << atts[i].name << " " << i << " " << endl;
+						//cout << "PUSHED ATTRIBUTE: "  << atts[i].name << " " << i << " " << endl;
 						attL.push_back(i);
 						count++;
 						break;
@@ -125,25 +125,25 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 			int* keepMe = new int[attL.size()];
 			copy(attL.begin(), attL.end(), keepMe);
 			Project* project = new Project(schemaIn, schemaOut, counter, count, keepMe, queryTree);
-			cout << "CALLING PROJECT" << endl;
+			//cout << "CALLING PROJECT" << endl;
 
 			if(_distinctAtts != 0){
 
 				Schema newschIn = schemaOut;
 				DuplicateRemoval* distinct = new DuplicateRemoval(newschIn, project);
 				treeRoot = (RelationalOp*)distinct;
-				cout << "ASSIGNED ROOT DISTINCT" << endl;
+				//cout << "ASSIGNED ROOT DISTINCT" << endl;
 
 			}else{
 
 				treeRoot = (RelationalOp*)project;
-				cout << "ASSIGNED ROOT" << endl;
+				//cout << "ASSIGNED ROOT" << endl;
 
 			}
 
 		}else{
 
-			cout << "CALLING BUILD FUNCTION" << endl;
+			//cout << "CALLING BUILD FUNCTION" << endl;
 			Function compute;
 			vector<string> attL, attT;
 			vector<unsigned int> distinctValues;
@@ -161,7 +161,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 
 	}else{
 
-		cout << "BUILD SUM" << endl;
+		//cout << "BUILD SUM" << endl;
 
 		vector<string> attL, attT;
 		vector<unsigned int> distinctValues;
@@ -170,7 +170,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 
 		while(_groupingAtts != NULL){
 
-			cout << "GROUPING ATTRIBUTES" << endl;
+			//cout << "GROUPING ATTRIBUTES" << endl;
 
 			string holder;
 			int dValues;
@@ -203,7 +203,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 			}
 
 			attL.push_back(name);
-			cout << name << endl;
+			//cout << name << endl;
 			attT.push_back(holder);
 			distinctValues.push_back(dValues);
 			groupAtts.push_back(schemaIn.Index(name));
@@ -213,7 +213,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 		}
 
 		Function compute;
-		cout << "MAKING FUNCTION COMPUTE" << endl;
+		//cout << "MAKING FUNCTION COMPUTE" << endl;
 
 		if(_finalFunction != NULL){
 
@@ -223,7 +223,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 			distinctValues.push_back(1);
 
 			Schema schemaOut(attL, attT, distinctValues);
-			cout << schemaOut << endl;
+			//cout << schemaOut << endl;
 
 			Sum* sum = new Sum(schemaIn, schemaOut, compute, queryTree);
 			treeRoot = (RelationalOp*)sum;
@@ -250,16 +250,16 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 		string outFile = "Output.txt";
 
 		//End with a write out
-		cout << "CREATING WRITEOUT" << endl;
+		//cout << "CREATING WRITEOUT" << endl;
 		WriteOut * writeout = new WriteOut(finalSchema, outFile, queryTree);
 		treeRoot = (RelationalOp*) writeout;
 
 	// connect everything in the query execution tree and return
-	cout << "CONNECT QUERY EXECUTION TREE" << endl;
+	//cout << "CONNECT QUERY EXECUTION TREE" << endl;
 	_queryTree.SetRoot(*treeRoot);
 
 	// free the memory occupied by the parse tree since it is not necessary anymore
-	cout << "FREEING MEMORY" << endl;
+	//cout << "FREEING MEMORY" << endl;
 	_tables = NULL;
 	_attsToSelect = NULL;
 	_finalFunction = NULL;
@@ -269,7 +269,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 
 RelationalOp* QueryCompiler::createTree(OptimizationTree*& root, map<string, RelationalOp*>& _pushDowns, AndList* _predicate, int depth){
 
-	cout << "CREATING OPTIMIZATION TREE" << endl;
+	//cout << "CREATING OPTIMIZATION TREE" << endl;
 
 	OptimizationTree* tree = root;
 
@@ -279,16 +279,16 @@ RelationalOp* QueryCompiler::createTree(OptimizationTree*& root, map<string, Rel
 
 	}
 
-	cout << "TABLES:" << endl;
+	//cout << "TABLES:" << endl;
 
 	if(tree->leftChild == NULL && tree->rightChild == NULL){
 
-		cout << "CHILDREN NULL" << endl;
+		//cout << "CHILDREN NULL" << endl;
 		return _pushDowns.find(root->tables[0])->second;
 
 	}else{
 
-		cout << "BUILDING JOINS" << endl;
+		//cout << "BUILDING JOINS" << endl;
 
 		Schema schemaLeft;
 		Schema schemaRight;

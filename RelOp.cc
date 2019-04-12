@@ -26,7 +26,10 @@ Scan::~Scan() {
 
 bool Scan::GetNext(Record& _record){
 
-	if(file.GetNext(_record) == 0){
+	cout << "Run Scan: GETNEXT" << endl;
+	if(file.GetNext(_record) == 1){
+		_record.print(cout, schema);
+		cout << endl;
 		return true;
 	} else return false;
 
@@ -74,6 +77,7 @@ bool Select::GetNext(Record& _record){
 		}
 	}*/
 
+	cout << "Run Select: GETNEXT" << endl;
 	while (producer->GetNext(_record)) {
 		if (predicate.Run(_record, constants)) {
 			return true;
@@ -202,6 +206,7 @@ Project::~Project() {
 
 bool Project::GetNext(Record& _record){
 
+	cout << "Run Project: GETNEXT" << endl;
 	if (producer->GetNext(_record)) {
 		_record.Project(keepMe, numAttsOutput, numAttsInput);
 		return true;
@@ -349,6 +354,7 @@ DuplicateRemoval::~DuplicateRemoval() {
 
 bool DuplicateRemoval::GetNext(Record& _record){
 
+	cout << "Run Duplicate Removal: GETNEXT" << endl;
 	KeyString key;
 	stringstream data;
 	vector<Attribute> attribs = schema.GetAtts();
@@ -410,6 +416,7 @@ Sum::~Sum() {
 
 bool Sum::GetNext(Record& _record){
 
+	cout << "Run Sum: GETNEXT" << endl;
 	if (recSent) return false;
 	int intSum = 0;
 	double doubleSum = 0;
@@ -470,6 +477,7 @@ GroupBy::~GroupBy() {
 
 bool GroupBy::GetNext(Record& _record){
 
+	cout << "Run GroupBy: GETNEXT" << endl;
 	_record.Project(groupingAtts.whichAtts, groupingAtts.numAtts, schemaIn.GetNumAtts());
 
 	int i = 0;
@@ -572,6 +580,7 @@ WriteOut::~WriteOut() {
 
 bool WriteOut::GetNext(Record& _record){
 
+	cout << "Run WriteOut: GETNEXT" << endl;
 	if (producer->GetNext(_record)) {
 		_record.print(outFileStream,schema);
 		outFileStream<<endl;
@@ -608,7 +617,7 @@ ostream& WriteOut::print(ostream& _os) {
 		_os << attList[i].name;
 	}
 
-	_os << "]";
+	_os << "]" << endl;
 	_os << *producer;
 	return _os;
 
@@ -626,7 +635,6 @@ ostream& operator<<(ostream& _os, QueryExecutionTree& _op) {
 void QueryExecutionTree::ExecuteQuery() {
 	cout << "Executing Query" << endl;
 	Record record;
-	while (1) {
-		if (!root->GetNext(record)) break;
+	while(root->GetNext(record)){
 	}
 }

@@ -50,7 +50,7 @@ void DBFile::Load (Schema& schema, char* textFile) {
 
 	FILE * pFile;
 	string str = textFile;
-	pFile = fopen(&str[0],"r");
+	pFile = fopen(&str[0],"rb");
 
 	while (1) {
 		Record record;
@@ -90,12 +90,18 @@ void DBFile::AppendRecord (Record& rec) {
 int DBFile::GetNext (Record& rec) {
 
 	if (page.GetFirst(rec) == 0) {
-		if (file.GetLength() == pageNum) return 0;
-		if (file.GetPage(page, pageNum) == -1) return 0;
-		page.GetFirst(rec);
+		if (file.GetLength() == pageNum) {
+			//cout << file.GetLength() << endl;
+			//cout << pageNum << endl;
+			return 0;
+		}
+		if (file.GetPage(page, pageNum) == -1) {
+			return 0;
+		}
+		//page.GetFirst(rec);
 		pageNum++;
+	} else {
+		return 1;
 	}
-
-	return 1;
 
 }
