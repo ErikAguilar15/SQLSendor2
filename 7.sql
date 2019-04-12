@@ -1,4 +1,4 @@
-SELECT s_name, s_phone
-FROM supplier
-WHERE s_nationkey=10 AND s_acctbal<100.0
+SELECT DISTINCT l_suppkey, l_shipdate, l_commitdate, l_receiptdate
+FROM lineitem
+WHERE l_shipdate > '1995-10-10' AND l_shipdate < '1995-10-15'
 

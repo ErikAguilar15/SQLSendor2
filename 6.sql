@@ -1,4 +1,4 @@
-SELECT l_orderkey 
-FROM lineitem
-WHERE l_quantity>30.0
+SELECT DISTINCT c_nationkey
+FROM customer
+WHERE c_custkey > 100 AND c_custkey < 150
 

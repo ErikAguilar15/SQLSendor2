@@ -10,6 +10,7 @@
 #include "DBFile.h"
 #include "Function.h"
 #include "EfficientMap.cc"
+#include "Keyify.h"
 #include "Comparison.h"
 
 using namespace std;

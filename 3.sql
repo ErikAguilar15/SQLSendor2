@@ -1,4 +1,4 @@
-SELECT l_orderkey, l_partkey, l_suppkey 
-FROM lineitem
-WHERE l_returnflag='R' AND l_discount<0.04 AND l_shipmode='MAIL'
+SELECT DISTINCT o_orderdate
+FROM orders
+WHERE	o_orderdate>'1995-03-10' AND o_orderdate<'1995-03-20'
 
