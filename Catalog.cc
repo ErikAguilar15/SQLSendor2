@@ -420,7 +420,7 @@ void Catalog::HeapFile(){
 	for (int i = 0; i < files.size(); i++){
 		filename = "heapTables/";
     filename += files[i];
-    filename += ".heap";
+    filename += ".dat";
 
 		heapTables.push_back(files[i]);
 		files[i] += ".tbl";
