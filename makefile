@@ -10,8 +10,14 @@ endif
 main.out:	QueryParser.o QueryLexer.o Schema.o Record.o File.o DBFile.o Comparison.o Function.o RelOp.o Catalog.o QueryOptimizer.o QueryCompiler.o main.o
 	$(CC) -o main.out main.o QueryParser.o QueryLexer.o Schema.o Record.o File.o DBFile.o Comparison.o Function.o RelOp.o Catalog.o QueryOptimizer.o QueryCompiler.o $(lfl)
 
+main_heapfile.out:	QueryParser.o QueryLexer.o Schema.o Record.o File.o DBFile.o Comparison.o Function.o RelOp.o Catalog.o QueryOptimizer.o QueryCompiler.o main_heapfile.o
+		$(CC) -o main_heapfile.out main_heapfile.o QueryParser.o QueryLexer.o Schema.o Record.o File.o DBFile.o Comparison.o Function.o RelOp.o Catalog.o QueryOptimizer.o QueryCompiler.o $(lfl)
+
 main.o:	main.cc
 	$(CC) -c main.cc
+
+main_heapfile.o:	main_heapfile.cc
+		$(CC) -c main_heapfile.cc
 
 Schema.o: Schema.cc
 	$(CC) -c Schema.cc

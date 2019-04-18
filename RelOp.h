@@ -202,7 +202,7 @@ private:
 	// operator generating data
 	RelationalOp* producer;
 
-	int recSent;
+	int recordSent;
 
 public:
 	Sum(Schema& _schemaIn, Schema& _schemaOut, Function& _compute,

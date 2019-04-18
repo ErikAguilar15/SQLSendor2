@@ -357,24 +357,29 @@ bool DuplicateRemoval::GetNext(Record& _record){
 	cout << "Run Duplicate Removal: GETNEXT" << endl;
 	KeyString key;
 	stringstream data;
-	vector<Attribute> attribs = schema.GetAtts();
+	vector<Attribute> atts = schema.GetAtts();
+
 	while(producer->GetNext(_record)){
 		for(int i = 0; i < schema.GetNumAtts(); i++){
 			int point = ((int*)_record.GetBits())[i + 1];
-			if(attribs[i].type == Integer){
-				data << attribs[i].name << " " << *(int*) &(_record.GetBits()[point]);
-			} else if(attribs[i].type == Float){
-				data << attribs[i].name << " " << *(double*) &(_record.GetBits()[point]);
-		} else if(attribs[i].type == String){
-			string dataString = (char*) &(_record.GetBits()[point]);
-			data << attribs[i].name << " " << dataString;
-	}
+			if(atts[i].type == Integer){
+				data << atts[i].name << " " << *(int*) &(_record.GetBits()[point]);
+			}
+			else if(atts[i].type == Float){
+				data << atts[i].name << " " << *(double*) &(_record.GetBits()[point]);
+			}
+			else if(atts[i].type == String){
+				string dataString = (char*) &(_record.GetBits()[point]);
+				data << atts[i].name << " " << dataString;
+			}
+
 	data << " ";
 	key = data.str();
 
 } if(!map.IsThere(key)){
 	map.Insert(key, key);
 	return true;
+
 }
 
 }
@@ -417,7 +422,7 @@ Sum::~Sum() {
 bool Sum::GetNext(Record& _record){
 
 	cout << "Run Sum: GETNEXT" << endl;
-	if (recSent) return false;
+	if (recordSent) return false;
 	int intSum = 0;
 	double doubleSum = 0;
 	while(producer->GetNext(_record)) {
@@ -435,11 +440,12 @@ bool Sum::GetNext(Record& _record){
 	*((double *) &(recSpace[currentPosInRec])) = val;
 	currentPosInRec += sizeof (double);
 	((int *) recSpace)[0] = currentPosInRec;
-	Record sumRec;
-	sumRec.CopyBits( recSpace, currentPosInRec );
+
+	Record sumRecord;
+	sumRecord.CopyBits( recSpace, currentPosInRec );
 	delete [] recSpace;
-	_record = sumRec;
-	recSent = 1;
+	_record = sumRecord;
+	recordSent = 1;
 	return true;
 
 }
@@ -491,47 +497,46 @@ bool GroupBy::GetNext(Record& _record){
 	Schema copy = schemaOut;
 	attributeStorage = copy.GetAtts();
 	for(i = 1; i < copy.GetNumAtts(); i++){
-
 		attributeNames.push_back(attributeStorage[i].name);
 	}
-		while(producer->GetNext(_record)){
+	while(producer->GetNext(_record)){
 
-			KeyString name = attributeStorage[vectorIterator].name;
-			KeyDouble value;
-			int point = ((int*) _record.GetBits())[iterator + 1];
-			if(groups.IsThere(name)){
-				if(attributeStorage[vectorIterator].type == Integer){
-					int *currentInt = (int*) &(_record.GetBits()[point]);
-					runningIntSum += *currentInt;
-					value = groups.Find(name);
-					groups.Remove(name, name, value);
-					value = runningIntSum;
-					groups.Insert(name, value);
-				}
-				else if (attributeStorage[vectorIterator].type == Float){
-					double *currentDouble = (double*) &(_record.GetBits()[point]);
-					runningDoubleSum += *currentDouble;
-					value = groups.Find(name);
-					groups.Remove(name, name, value);
-					value = runningDoubleSum;
-					groups.Insert(name, value);
-				}
-			} else {
-				cout << "name not found" << endl;
-				if(attributeStorage[vectorIterator].type == Integer){
-					int *currentInt = (int*) &(_record.GetBits()[point]);
-					value = *currentInt;
-					groups.Insert(name, value);
-				}
-				else if(attributeStorage[vectorIterator].type == Float){
-					double *currentDouble = (double*) &(_record.GetBits()[point]);
-					value = *currentDouble;
-					groups.Insert(name, value);
-				}
+		KeyString name = attributeStorage[vectorIterator].name;
+		KeyDouble value;
+		int point = ((int*) _record.GetBits())[iterator + 1];
+		if(groups.IsThere(name)){
+			if(attributeStorage[vectorIterator].type == Integer){
+				int *currentInt = (int*) &(_record.GetBits()[point]);
+				runningIntSum += *currentInt;
+				value = groups.Find(name);
+				groups.Remove(name, name, value);
+				value = runningIntSum;
+				groups.Insert(name, value);
 			}
-			vectorIterator++;
-			return true;
+			else if (attributeStorage[vectorIterator].type == Float){
+				double *currentDouble = (double*) &(_record.GetBits()[point]);
+				runningDoubleSum += *currentDouble;
+				value = groups.Find(name);
+				groups.Remove(name, name, value);
+				value = runningDoubleSum;
+				groups.Insert(name, value);
+			}
+		} else {
+			cout << "Not Found" << endl;
+			if(attributeStorage[vectorIterator].type == Integer){
+				int *currentInt = (int*) &(_record.GetBits()[point]);
+				value = *currentInt;
+				groups.Insert(name, value);
+			}
+			else if(attributeStorage[vectorIterator].type == Float){
+				double *currentDouble = (double*) &(_record.GetBits()[point]);
+				value = *currentDouble;
+				groups.Insert(name, value);
+			}
 		}
+		vectorIterator++;
+		return true;
+	}
 		groups.MoveToStart();
 		for(int i = 0; i < groups.Length(); i++){
 			cout << groups.CurrentData() << endl;

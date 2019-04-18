@@ -6,36 +6,33 @@
 #include "QueryOptimizer.h"
 #include "QueryCompiler.h"
 #include "RelOp.h"
+#include "Record.h"
 
 using namespace std;
 
-int main() {
+int main(int argc, char* argv[]) {
 
   string dbFile = "catalog.sqlite";
 	Catalog catalog(dbFile);
+
 	DBFile db;
-  Schema sch;
+  string tFile = argv[1];
+  Schema sch; catalog.GetSchema(tFile, sch);
 
-	string filename;
-	vector <string> files;
-	vector <string> heapTables;
-	catalog.GetTables(files);
+  cout << sch << endl;
 
-	for (int i = 0; i < files.size(); i++){
-    filename = "heapTables/"
-    filename += files[i];
-    filename += ".txt";
+  string tblName = argv[1]; tblName += ".heap";
+  char* tblFile = new char[1000];
+  strcpy(tblFile, tblName.c_str());
+  db.Open(tblFile);
 
-    heapTables.push_back(files[i]);
-		files[i] += ".tbl";
-		files[i].insert(0,"heapTables/");
-		cout<<files[i]<<endl;
-
-		db.Create(&filename[0],(FileType) Heap);
-    catalog.GetSchema(heapTables[i],sch);
-		db.Load(sch, &files[i][0]);
+  Record rec;
+  while (db.GetNext(rec)) {
+    rec.print(cout, sch);
+    cout << endl;
   }
 
-    db.Close();
+  db.Close();
 
+  delete [] tblFile;
 }
