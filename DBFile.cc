@@ -88,6 +88,10 @@ void DBFile::AppendRecord (Record& rec) {
 
 int DBFile::GetNext (Record& rec) {
 
+	if (pageNum == 0){
+		MoveFirst();
+	}
+
 	if (page.GetFirst(rec) == 0) {
 		if (file.GetLength() == pageNum) {
 			cout << file.GetLength() << endl;
