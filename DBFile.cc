@@ -1,4 +1,7 @@
 #include <string>
+#include <sys/stat.h>
+#include <sstream>
+#include <cstring>
 
 #include "Config.h"
 #include "Record.h"
@@ -41,7 +44,11 @@ int DBFile::Create (char* f_path, FileType f_type) {
 int DBFile::Open (char* f_path) {
 
 	fileName = f_path;
-	return file.Open(1,f_path);
+
+	struct stat fileStat;
+	if(stat(f_path, &fileStat) != 0){
+		return Create(f_path, Heap);
+	} else return file.Open(fileStat.st_size, f_path);
 
 }
 
@@ -92,7 +99,7 @@ void DBFile::AppendRecord (Record& rec) {
 
 int DBFile::GetNext (Record& rec) {
 
-	if(pageNum = 0){
+	if(pageNum == 0){
 		MoveFirst();
 	}
 	while(true){
@@ -100,7 +107,7 @@ int DBFile::GetNext (Record& rec) {
 		if (file.GetLength() == pageNum) {
 			break;
 		} else {
-		file.GetPage(page, pageNum++)
+		file.GetPage(page, pageNum++);
 	}
 } else return 0;
 		}

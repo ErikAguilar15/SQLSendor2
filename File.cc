@@ -198,6 +198,8 @@ void File :: AddPage (Page& addMe, off_t whichPage) {
 	lseek (fileDescriptor, PAGE_SIZE * (whichPage+1), SEEK_SET);
 	write (fileDescriptor, bits, PAGE_SIZE);
 
+	curLength = whichPage + 1;
+
 	delete [] bits;
 }
 
