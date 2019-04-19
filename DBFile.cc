@@ -34,14 +34,16 @@ int DBFile::Create (char* f_path, FileType f_type) {
 
 	ftype = f_type;
 	fileName = f_path;
-	return (file.Open(0,f_path));
+	return file.Open(0,f_path);
 
 }
 
 int DBFile::Open (char* f_path) {
 
 	fileName = f_path;
-	return file.Open(1,f_path);
+	if(file.GetLength() != 0){
+		return Create(f_path, Heap);
+	} else return file.Open(1,f_path);
 
 }
 
