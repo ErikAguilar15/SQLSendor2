@@ -44,12 +44,15 @@ int DBFile::Create (char* f_path, FileType f_type) {
 int DBFile::Open (char* f_path) {
 
 	fileName = f_path;
+	cout << fileName << endl;
 
 	struct stat fileStat;
 	if(stat(f_path, &fileStat) != 0){
 		return Create(f_path, Heap);
-	} else return file.Open(fileStat.st_size, f_path);
-
+	} else {
+		cout << fileStat.st_size << endl;
+		return file.Open(fileStat.st_size, f_path);
+	}
 }
 
 void DBFile::Load (Schema& schema, char* textFile) {
@@ -90,6 +93,7 @@ void DBFile::AppendRecord (Record& rec) {
 
 	if (!page.Append(rec)){
 		file.AddPage(page, file.GetLength());
+		cout << file.GetLength() << endl;
 		pageNum++;
 		page.EmptyItOut();
 		page.Append(rec);
@@ -99,17 +103,18 @@ void DBFile::AppendRecord (Record& rec) {
 
 int DBFile::GetNext (Record& rec) {
 
-	if(pageNum == 0){
-		MoveFirst();
-	}
-	while(true){
-	if (!page.GetFirst(rec)) {
+	if (page.GetFirst(rec) == 0) {
 		if (file.GetLength() == pageNum) {
-			break;
-		} else {
-		file.GetPage(page, pageNum++);
-	}
-} else return 0;
+			cout << file.GetLength() << endl;
+			cout << pageNum << endl;
+			return 0;
 		}
-	return -1;
+		if (file.GetPage(page, pageNum) == -1) {
+			return 0;
+		}
+		//page.GetFirst(rec);
+		pageNum++;
+	}
+
+	return 1;
 }
