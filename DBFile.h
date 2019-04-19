@@ -14,6 +14,7 @@ using namespace std;
 class DBFile {
 private:
 	File file;
+	FileType fileType;
 	string fileName;
 
 	Page page;
@@ -35,6 +36,12 @@ public:
 	void MoveFirst ();
 	void AppendRecord (Record& _addMe);
 	int GetNext (Record& _fetchMe);
+
+	void WriteToFile();
+	int GetRecord(Record& putHere, off_t whichPage, off_t whichRecord);
+	string GetTableName();
+	const char* GetTableName();
+	int GetCurrentPageNum();
 };
 
 #endif //DBFILE_H
