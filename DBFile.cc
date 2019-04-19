@@ -41,22 +41,20 @@ int DBFile::Create (char* f_path, FileType f_type) {
 int DBFile::Open (char* f_path) {
 
 	fileName = f_path;
-	if(file.GetLength() != 0){
-		return Create(f_path, Heap);
-	} else return file.Open(1,f_path);
+	return file.Open(1,f_path);
 
 }
 
 void DBFile::Load (Schema& schema, char* textFile) {
-
+	MoveFirst();
 	FILE * pFile;
-	string str = textFile;
-	pFile = fopen(&str[0],"r");
+	pFile = fopen(textFile,"r");
 
-	while (1) {
+	while (true) {
 		Record record;
-		if (record.ExtractNextRecord (schema, *pFile) == 0) break;
+		if (record.ExtractNextRecord (schema, *pFile)){
 		AppendRecord(record);
+	} else break;
 	}
 
 	file.AddPage(page, file.GetLength());
@@ -66,43 +64,45 @@ void DBFile::Load (Schema& schema, char* textFile) {
 
 int DBFile::Close () {
 
-	if(ftype == Sorted || ftype == Index) file.AddPage(page, file.GetLength());
-	return file.Close();
+	int test = file.Close();
+	if(test == -1){
+		cout << "Failed to close DBFile" << endl;
+	}
+	return test;
 
 }
 
 void DBFile::MoveFirst () {
 
 	pageNum = 0;
+	page.EmptyItOut();
 
 }
 
 void DBFile::AppendRecord (Record& rec) {
 
-	if (page.Append(rec) == 0){
+	if (!page.Append(rec)){
 		file.AddPage(page, file.GetLength());
+		pageNum++;
 		page.EmptyItOut();
 		page.Append(rec);
-		pageNum++;
 	}
 
 }
 
 int DBFile::GetNext (Record& rec) {
 
-	if (page.GetFirst(rec) == 0) {
-		if (file.GetLength() == pageNum) {
-			cout << file.GetLength() << endl;
-			cout << pageNum << endl;
-			return 0;
-		}
-		if (file.GetPage(page, pageNum) == -1) {
-			return 0;
-		}
-		//page.GetFirst(rec);
-		pageNum++;
+	if(pageNum = 0){
+		MoveFirst();
 	}
-
-	return 1;
-
+	while(true){
+	if (!page.GetFirst(rec)) {
+		if (file.GetLength() == pageNum) {
+			break;
+		} else {
+		file.GetPage(page, pageNum++)
+	}
+} else return 0;
+		}
+	return -1;
 }
