@@ -92,19 +92,11 @@ void DBFile::AppendRecord (Record& rec) {
 
 int DBFile::GetNext (Record& rec) {
 
-<<<<<<< HEAD
 	if(pageNum = 0){
 		MoveFirst();
 	}
 	while(true){
 	if (!page.GetFirst(rec)) {
-=======
-	if (pageNum == 0){
-		MoveFirst();
-	}
-
-	if (page.GetFirst(rec) == 0) {
->>>>>>> a27ad93e16588d6fbc50bc0001230a16257156bc
 		if (file.GetLength() == pageNum) {
 			break;
 		} else {
