@@ -16,23 +16,28 @@ int main(int argc, char* argv[]) {
 	Catalog catalog(dbFile);
 
 	DBFile db;
+  Schema sch;
   string tFile = argv[1];
-  Schema sch; catalog.GetSchema(tFile, sch);
+  tFile.insert(0,"heapTables/");
+  //catalog.GetSchema(tFile, sch);
 
   cout << sch << endl;
 
-  string tblName = argv[1]; tblName += ".heap";
-  char* tblFile = new char[1000];
-  strcpy(tblFile, tblName.c_str());
-  db.Open(tblFile);
+  string ogFile = tFile; ogFile += ".tbl";
+  cout << ogFile << endl;
+  string tblName = tFile; tblName += ".heap";
+  catalog.GetSchema(tblName, sch);
+  db.Create(&tblName[0],(FileType) Heap);
+  db.Open(&tblName[0]);
+  db.Load(sch, &ogFile[0]);
 
   Record rec;
-  while (db.GetNext(rec)) {
+  /*while (db.GetNext(rec)) {
     rec.print(cout, sch);
     cout << endl;
-  }
+  }*/
 
   db.Close();
 
-  delete [] tblFile;
+  //delete [] tblFile;
 }

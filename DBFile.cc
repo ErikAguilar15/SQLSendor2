@@ -63,11 +63,14 @@ void DBFile::Load (Schema& schema, char* textFile) {
 	while (true) {
 		Record record;
 		if (record.ExtractNextRecord (schema, *pFile)){
-		AppendRecord(record);
-	} else break;
+			record.print(cout, schema);
+			cout << endl;
+			AppendRecord(record);
+		} else break;
 	}
 
 	file.AddPage(page, file.GetLength());
+	page.EmptyItOut();
 	fclose(pFile);
 
 }

@@ -82,7 +82,7 @@ string Catalog::convertType(Type t) {
 
 void Catalog::get_data_from_meta_attributes() {
 	//getting data from MetaTables
-	string sql = "SELECT * FROM meta_attributes";
+	string sql = "SELECT * FROM meta_attributes ORDER BY a_index";
 	check_query(sql);
 
 	rc = sqlite3_exec(db, "BEGIN TRANSACTION", 0, 0, 0);
@@ -415,11 +415,14 @@ void Catalog::HeapFile(){
 	string filename;
 	vector <string> files;
 	vector <string> heapTables;
+
+	//files.push_back("region");
+	//files.push_back("nation");
 	catalog.GetTables(files);
 
 	for (int i = 0; i < files.size(); i++){
 		filename = "heapTables/";
-    filename = files[i];
+    filename += files[i];
     filename += ".heap";
 
 		heapTables.push_back(files[i]);
@@ -432,7 +435,14 @@ void Catalog::HeapFile(){
 		db.Open(&filename[0]);
 		catalog.SetDataFile(files[i], filename);
 		db.Load(sch, &files[i][0]);
+
   }
+
+	Record rec;
+  /*while (db.GetNext(rec)) {
+    rec.print(cout, sch);
+    cout << endl;
+  }*/
 
     db.Close();
 }
