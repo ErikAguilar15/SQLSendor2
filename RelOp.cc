@@ -641,5 +641,6 @@ void QueryExecutionTree::ExecuteQuery() {
 	cout << "Executing Query" << endl;
 	Record record;
 	while(root->GetNext(record)){
+		//record.print()
 	}
 }

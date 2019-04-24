@@ -405,7 +405,7 @@ bool Catalog::DropTable(string& _table) {
 
 }
 
-void Catalog::HeapFile(){
+void Catalog::HeapFile(string file){
 
 	string dbFile = "catalog.sqlite";
 	Catalog catalog(dbFile);
@@ -416,9 +416,9 @@ void Catalog::HeapFile(){
 	vector <string> files;
 	vector <string> heapTables;
 
-	//files.push_back("region");
-	//files.push_back("nation");
-	catalog.GetTables(files);
+	//files.push_back(file);
+	files.push_back("region");
+	//catalog.GetTables(files);
 
 	for (int i = 0; i < files.size(); i++){
 		filename = "heapTables/";
@@ -439,10 +439,10 @@ void Catalog::HeapFile(){
   }
 
 	Record rec;
-  /*while (db.GetNext(rec)) {
+  while (db.GetNext(rec)) {
     rec.print(cout, sch);
     cout << endl;
-  }*/
+  }
 
     db.Close();
 }

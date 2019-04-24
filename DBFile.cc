@@ -45,14 +45,16 @@ int DBFile::Open (char* f_path) {
 
 	fileName = f_path;
 	cout << fileName << endl;
+	return file.Open(1, f_path);
 
+	/*
 	struct stat fileStat;
 	if(stat(f_path, &fileStat) != 0){
 		return Create(f_path, Heap);
 	} else {
 		cout << fileStat.st_size << endl;
 		return file.Open(fileStat.st_size, f_path);
-	}
+	}*/
 }
 
 void DBFile::Load (Schema& schema, char* textFile) {
@@ -70,7 +72,7 @@ void DBFile::Load (Schema& schema, char* textFile) {
 	}
 
 	file.AddPage(page, file.GetLength());
-	page.EmptyItOut();
+	//page.EmptyItOut();
 	fclose(pFile);
 
 }
@@ -88,7 +90,7 @@ int DBFile::Close () {
 void DBFile::MoveFirst () {
 
 	pageNum = 0;
-	page.EmptyItOut();
+	//page.EmptyItOut();
 
 }
 
@@ -116,6 +118,7 @@ int DBFile::GetNext (Record& rec) {
 			return 0;
 		}
 		//page.GetFirst(rec);
+		cout << pageNum << endl;
 		pageNum++;
 	}
 

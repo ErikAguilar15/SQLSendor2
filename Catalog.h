@@ -122,7 +122,7 @@ public:
 	 */
 	friend ostream& operator<<(ostream& _os, Catalog& _c);
 
-	void HeapFile();
+	void HeapFile(string file);
 
 };
 
