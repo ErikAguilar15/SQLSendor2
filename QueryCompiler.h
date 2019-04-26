@@ -13,7 +13,7 @@
 #include "ParseTree.h"
 #include "QueryOptimizer.h"
 #include "RelOp.h"
-#include <map>
+#include <unordered_map>
 
 using namespace std;
 
@@ -32,7 +32,7 @@ public:
 		NameList* _groupingAtts, int& _distinctAtts,
 		QueryExecutionTree& _queryTree);
 
-	RelationalOp* createTree(OptimizationTree*& root, map<string,  RelationalOp*>& _pushDowns, AndList* _predicate, int depth);
+	RelationalOp* createTree(OptimizationTree*& root, unordered_map<string,  RelationalOp*>& _pushDowns, AndList* _predicate, int depth);
 };
 
 #endif // _QUERY_COMPILER_H

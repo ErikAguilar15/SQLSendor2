@@ -27,7 +27,7 @@ int main () {
 	string dbFile = "catalog.sqlite";
 	Catalog catalog(dbFile);
 
-	catalog.HeapFile("");
+	//catalog.HeapFile("");
 
 	// this is the query optimizer
 	// it is not invoked directly but rather passed to the query compiler

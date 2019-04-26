@@ -428,12 +428,14 @@ void Catalog::HeapFile(string file){
 		heapTables.push_back(files[i]);
 		files[i] += ".tbl";
 		files[i].insert(0,"heapTables/");
-		cout<<files[i]<<endl;
+		//cout<<files[i]<<endl;
 
+		//cout << heapTables[i] << endl;
 		catalog.GetSchema(heapTables[i],sch);
+		//cout << sch << endl;
 		db.Create(&filename[0],(FileType) Heap);
 		db.Open(&filename[0]);
-		catalog.SetDataFile(files[i], filename);
+		//catalog.SetDataFile(files[i], filename);
 		db.Load(sch, &files[i][0]);
 
   }

@@ -9,7 +9,7 @@
 #include "RelOp.h"
 
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <vector>
 #include <algorithm>
 #include <limits>
@@ -31,13 +31,15 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 
 	// create a SCAN operator for each table in the query
 	TableList * tables = _tables;
-	map<string, RelationalOp*> pushDownMap;
+	unordered_map<string, RelationalOp*> pushDownMap;
 	while (tables != NULL) {
 		DBFile db;
 		Schema schema;
 		string file;
 		string tabName = tables->tableName;
 		catalog->GetDataFile(tabName, file);
+		db.Open(&file[0]);
+		db.MoveFirst();
 		catalog->GetSchema(tabName, schema);
 
 		//Append scanned table to map of scanned tables
@@ -72,9 +74,9 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 
 	// call the optimizer to compute the join order
 	//cout << "CALLING OPTIMIZER" << endl;
-	OptimizationTree* root = new OptimizationTree;
-	optimizer->Optimize(_tables, _predicate, root);
-	OptimizationTree* rootCopy = root;
+	OptimizationTree root;
+	optimizer->Optimize(_tables, _predicate, &root);
+	OptimizationTree* rootCopy = &root;
 
 	// create join operators based on the optimal order computed by the optimizer
 	//cout << "CREATING JOINS" << endl;
@@ -129,7 +131,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 
 			if(_distinctAtts != 0){
 
-				Schema newschIn = schemaOut;
+				Schema newschIn = project->GetSchema();
 				DuplicateRemoval* distinct = new DuplicateRemoval(newschIn, project);
 				treeRoot = (RelationalOp*)distinct;
 				//cout << "ASSIGNED ROOT DISTINCT" << endl;
@@ -267,7 +269,7 @@ void QueryCompiler::Compile(TableList* _tables, NameList* _attsToSelect,
 	_groupingAtts = NULL;
 }
 
-RelationalOp* QueryCompiler::createTree(OptimizationTree*& root, map<string, RelationalOp*>& _pushDowns, AndList* _predicate, int depth){
+RelationalOp* QueryCompiler::createTree(OptimizationTree*& root, unordered_map<string, RelationalOp*>& _pushDowns, AndList* _predicate, int depth){
 
 	//cout << "CREATING OPTIMIZATION TREE" << endl;
 

@@ -20,9 +20,9 @@ int main(int argc, char* argv[]) {
   Record rec;
   string tFile = argv[1];
   //tFile.insert(0,"heapTables/");
-  catalog.GetSchema(tFile, sch);
+  //catalog.GetSchema(tblName, sch);
 
-  cout << sch << endl;
+  //cout << sch << endl;
   cout << tFile << endl;
 
   //string ogFile = tFile; ogFile += ".tbl";
@@ -38,9 +38,15 @@ int main(int argc, char* argv[]) {
   db.Open(tblFile);
   //db.Load(sch, tblFile);
 
+  catalog.GetSchema(tFile, sch);
+  cout << sch << endl;
+  int i = 0;
   while (db.GetNext(rec)) {
-    //rec.print(cout, sch);
-    //cout << endl;
+    if (i != 0) {
+      rec.print(cout, sch);
+      cout << endl;
+    }
+    i++;
   }
 
   db.Close();

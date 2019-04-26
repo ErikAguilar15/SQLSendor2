@@ -33,6 +33,8 @@ void Page :: EmptyItOut() {
 int Page :: GetFirst(Record& firstOne) {
 	// move to the first record
 	myRecs.MoveToStart ();
+	//cout << numRecs << endl;
+	//firstOne = myRecs.Current();
 
 	// make sure there is data
 	if (myRecs.AtEnd()) return 0;

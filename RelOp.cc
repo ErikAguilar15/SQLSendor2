@@ -27,9 +27,10 @@ Scan::~Scan() {
 bool Scan::GetNext(Record& _record){
 
 	cout << "Run Scan: GETNEXT" << endl;
-	if(file.GetNext(_record) == 1){
-		_record.print(cout, schema);
-		cout << endl;
+	file.MoveFirst();
+	int check = file.GetNext(_record);
+	//cout << check << endl;
+	if(check == 1){
 		return true;
 	} else return false;
 
@@ -586,7 +587,9 @@ WriteOut::~WriteOut() {
 bool WriteOut::GetNext(Record& _record){
 
 	cout << "Run WriteOut: GETNEXT" << endl;
-	if (producer->GetNext(_record)) {
+	int check = producer->GetNext(_record);
+
+	if (check) {
 		_record.print(outFileStream,schema);
 		outFileStream<<endl;
 		return true;
@@ -640,7 +643,7 @@ ostream& operator<<(ostream& _os, QueryExecutionTree& _op) {
 void QueryExecutionTree::ExecuteQuery() {
 	cout << "Executing Query" << endl;
 	Record record;
+	int i = 0;
 	while(root->GetNext(record)){
-		//record.print()
 	}
 }

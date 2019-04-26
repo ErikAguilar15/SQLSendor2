@@ -52,6 +52,8 @@ private:
 
 	string tableName;
 
+	int counter = 0;
+
 public:
 	Scan(Schema& _schema, DBFile& _file);
 	virtual ~Scan();
@@ -288,7 +290,8 @@ public:
 	virtual ~QueryExecutionTree() {}
 
 	void ExecuteQuery();
-	void SetRoot(RelationalOp& _root) {root = &_root;}
+	void SetRoot(RelationalOp& _root) {
+		root = &_root;}
 
     friend ostream& operator<<(ostream& _os, QueryExecutionTree& _op);
 };
